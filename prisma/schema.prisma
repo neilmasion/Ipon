@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                  String             @id @default(uuid())
+  name                String
+  email               String             @unique
+  password            String
+  isVerified          Boolean            @default(false)
+  verificationToken   String?
+  resetToken          String?
+  resetTokenExpiry    DateTime?
+  currency            String             @default("PHP")
+  currencySymbol      String             @default("₱")
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  challenges          IponChallenge[]
+  savingsRecords      SavingsRecord[]
+  goals               Goal[]
+  reminderSettings    ReminderSetting?
+  memberships         ChallengeMember[]
+}
+
+model IponChallenge {
+  id              String            @id @default(uuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  startDate       String            // Format: YYYY-MM-DD
+  endDate         String?           // Format: YYYY-MM-DD
+  dailyGoal       Float
+  targetAmount    Float
+  connectedGoalId String?
+  connectedGoal   Goal?             @relation(fields: [connectedGoalId], references: [id], onDelete: SetNull)
+  status          String            @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  inviteCode      String?           @unique // e.g. "IPON-7K9X2B"
+  isShared        Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  members         ChallengeMember[]
+  savingsRecords  SavingsRecord[]
+}
+
+model ChallengeMember {
+  id          String         @id @default(uuid())
+  challengeId String
+  challenge   IponChallenge  @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String         @default("MEMBER") // OWNER, MEMBER
+  joinedAt    DateTime       @default(now())
+
+  @@unique([challengeId, userId])
+}
+
+model Goal {
+  id              String          @id @default(uuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  targetAmount    Float
+  currentAmount   Float           @default(0)
+  targetDate      String?         // Format: YYYY-MM-DD
+  icon            String?         @default("🎯")
+  status          String          @default("ACTIVE") // ACTIVE, REACHED, ARCHIVED
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  challenges      IponChallenge[]
+  savingsRecords  SavingsRecord[]
+}
+
+model SavingsRecord {
+  id              String          @id @default(uuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId     String?
+  challenge       IponChallenge?  @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  goalId          String?
+  goal            Goal?           @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  date            String          // Format: YYYY-MM-DD
+  dailyGoal       Float           @default(0)
+  amountSaved     Float           @default(0)
+  note            String?
+  status          String          @default("SAVED") // SAVED, PARTIAL, MISSED
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([userId, challengeId, date])
+}
+
+model ReminderSetting {
+  id              String          @id @default(uuid())
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled         Boolean         @default(true)
+  reminderTime    String          @default("20:00") // 8:00 PM
+  email           String?
+  notifyMissed    Boolean         @default(true)
+  notifyStreak    Boolean         @default(true)
+  notifyMilestone Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
