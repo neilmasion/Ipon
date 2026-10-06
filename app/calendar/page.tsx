@@ -36,30 +36,36 @@ export default function CalendarPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const [uRes, cRes] = await Promise.all([
-        fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)),
-        fetch("/api/challenges").then((r) => (r.ok ? r.json() : null)),
-      ]);
-
-      if (!uRes?.user) {
+      const uRes = await fetch("/api/auth/me");
+      if (uRes.status === 401) {
         router.replace("/login");
         return;
       }
-      setUser(uRes.user);
-      const chals = cRes?.challenges || [];
-      setChallenges(chals);
+      if (uRes.ok) {
+        const uData = await uRes.json();
+        if (uData.user) setUser(uData.user);
+      }
 
-      if (chals.length > 0) {
-        const targetId = selectedChallengeId || chals[0].id;
-        setSelectedChallengeId(targetId);
-        await loadChallengeDetails(targetId);
+      const cRes = await fetch("/api/challenges");
+      if (cRes.ok) {
+        const cData = await cRes.json();
+        const chals = cData.challenges || [];
+        setChallenges(chals);
+
+        if (chals.length > 0) {
+          setSelectedChallengeId((prev) => {
+            const targetId = prev || chals[0].id;
+            loadChallengeDetails(targetId);
+            return targetId;
+          });
+        }
       }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [selectedChallengeId, router]);
+  }, [router]);
 
   async function loadChallengeDetails(id: string) {
     try {
@@ -100,7 +106,7 @@ export default function CalendarPage() {
   if (loading) {
     return (
       <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-        <Navbar currencySymbol={currencySymbol} />
+        <Navbar currencySymbol={currencySymbol} user={user} />
         <LoadingScreen message="Loading calendar tracker..." subMessage="Synchronizing your savings checkmarks" />
         <BottomNav />
       </div>
@@ -109,7 +115,7 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-      <Navbar onOpenAddSavings={() => handleDateClick(getTodayDateStr(), 0)} currencySymbol={currencySymbol} />
+      <Navbar onOpenAddSavings={() => handleDateClick(getTodayDateStr(), 0)} currencySymbol={currencySymbol} user={user} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
         {/* Page Title & Controls */}

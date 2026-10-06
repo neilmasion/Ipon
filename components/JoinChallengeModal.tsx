@@ -39,9 +39,13 @@ export default function JoinChallengeModal({
         body: JSON.stringify({ inviteCode: inviteCode.trim() }),
       });
 
-      const data = await res.json();
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {}
+
       if (!res.ok) {
-        throw new Error(data.error || "Failed to join challenge");
+        throw new Error(data?.error || `Failed to join challenge (Status ${res.status})`);
       }
 
       setSuccessMsg(data.message || "Successfully joined challenge!");

@@ -3,13 +3,29 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PiggyBank, Lock, Mail, User, ArrowRight, AlertCircle, CheckCircle2, UserCheck, LogOut } from "lucide-react";
+import { 
+  PiggyBank, 
+  Lock, 
+  Mail, 
+  User, 
+  ArrowRight, 
+  AlertCircle, 
+  CheckCircle2, 
+  UserCheck, 
+  LogOut,
+  Eye,
+  EyeOff,
+  ShieldCheck
+} from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successInfo, setSuccessInfo] = useState<string | null>(null);
@@ -44,6 +60,17 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long for security.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match. Please verify your confirm password.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -53,9 +80,15 @@ export default function RegisterPage() {
         body: JSON.stringify({ name, email, password }),
       });
 
-      const data = await res.json();
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // non-JSON response
+      }
+
       if (!res.ok) {
-        throw new Error(data.error || "Failed to sign up");
+        throw new Error(data?.error || `Unable to create account (Status ${res.status}). Please check your connection.`);
       }
 
       setSuccessInfo(
@@ -186,15 +219,70 @@ export default function RegisterPage() {
                 <Lock className="w-3.5 h-3.5 text-ipon-primary" />
                 <span>Password</span>
               </label>
-              <input
-                type="password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={6}
-                className="w-full px-3.5 py-2.5 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-sm focus:outline-none focus:border-ipon-primary focus:ring-2 focus:ring-ipon-primary/10 transition-all font-medium"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="At least 8 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={8}
+                  className="w-full pl-3.5 pr-11 py-2.5 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-sm focus:outline-none focus:border-ipon-primary focus:ring-2 focus:ring-ipon-primary/10 transition-all font-medium"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ipon-muted hover:text-ipon-primary transition-colors focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-ipon-text mb-1.5 flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-ipon-primary" />
+                <span>Confirm Password</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Re-enter your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  minLength={8}
+                  className={`w-full pl-3.5 pr-11 py-2.5 rounded-2xl border bg-ipon-bg/50 text-sm focus:outline-none focus:ring-2 transition-all font-medium ${
+                    confirmPassword && password !== confirmPassword
+                      ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                      : "border-ipon-border focus:border-ipon-primary focus:ring-ipon-primary/10"
+                  }`}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ipon-muted hover:text-ipon-primary transition-colors focus:outline-none"
+                  aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                  title={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              {confirmPassword && password !== confirmPassword && (
+                <p className="text-[11px] text-red-500 font-medium mt-1">
+                  Passwords do not match
+                </p>
+              )}
             </div>
 
             <button

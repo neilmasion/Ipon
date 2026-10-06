@@ -48,19 +48,23 @@ export default function HistoryPage() {
       else if (activeFilter === "year") url += `year=${currentYearStr}`;
       else if (activeFilter === "challenge" && selectedChallengeFilter) url += `challengeId=${selectedChallengeFilter}`;
 
-      const [uRes, sRes, cRes] = await Promise.all([
-        fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)),
+      const uRes = await fetch("/api/auth/me");
+      if (uRes.status === 401) {
+        router.replace("/login");
+        return;
+      }
+      if (uRes.ok) {
+        const uData = await uRes.json();
+        if (uData.user) setUser(uData.user);
+      }
+
+      const [sRes, cRes] = await Promise.all([
         fetch(url).then((r) => (r.ok ? r.json() : null)),
         fetch("/api/challenges").then((r) => (r.ok ? r.json() : null)),
       ]);
 
-      if (!uRes?.user) {
-        router.replace("/login");
-        return;
-      }
-      setUser(uRes.user);
-      setRecords(sRes?.records || []);
-      setChallenges(cRes?.challenges || []);
+      if (sRes?.records) setRecords(sRes.records);
+      if (cRes?.challenges) setChallenges(cRes.challenges);
     } catch (err) {
       console.error(err);
     } finally {
@@ -123,7 +127,7 @@ export default function HistoryPage() {
   if (loading) {
     return (
       <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-        <Navbar currencySymbol={currencySymbol} />
+        <Navbar currencySymbol={currencySymbol} user={user} />
         <LoadingScreen message="Loading savings history..." subMessage="Retrieving your past contributions" />
         <BottomNav />
       </div>
@@ -132,7 +136,7 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-      <Navbar onOpenAddSavings={() => setIsAddSavingsOpen(true)} currencySymbol={currencySymbol} />
+      <Navbar onOpenAddSavings={() => setIsAddSavingsOpen(true)} currencySymbol={currencySymbol} user={user} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {/* Header */}

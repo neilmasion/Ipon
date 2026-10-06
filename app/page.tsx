@@ -50,28 +50,27 @@ export default function HomePage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [userRes, chalRes] = await fetchAll();
-      if (!userRes) {
+      const uRes = await fetch("/api/auth/me");
+      if (uRes.status === 401) {
         router.replace("/login");
         return;
       }
-      setUser(userRes);
-      if (chalRes) setChallenges(chalRes);
+      if (uRes.ok) {
+        const uData = await uRes.json();
+        if (uData.user) setUser(uData.user);
+      }
+
+      const cRes = await fetch("/api/challenges");
+      if (cRes.ok) {
+        const cData = await cRes.json();
+        if (cData.challenges) setChallenges(cData.challenges);
+      }
     } catch (err) {
       console.error("Fetch data error:", err);
-      router.replace("/login");
     } finally {
       setLoading(false);
     }
   }, [router]);
-
-  async function fetchAll() {
-    const [uRes, cRes] = await Promise.all([
-      fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/challenges").then((r) => (r.ok ? r.json() : null)),
-    ]);
-    return [uRes?.user, cRes?.challenges || []];
-  }
 
   useEffect(() => {
     fetchData();
@@ -110,7 +109,7 @@ export default function HomePage() {
   if (loading) {
     return (
       <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-        <Navbar currencySymbol={currencySymbol} />
+        <Navbar currencySymbol={currencySymbol} user={user} />
         <LoadingScreen message="Loading dashboard..." subMessage="Fetching streaks and active challenges" />
         <BottomNav />
       </div>
@@ -119,7 +118,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-      <Navbar onOpenAddSavings={handleOpenAddToday} currencySymbol={currencySymbol} />
+      <Navbar onOpenAddSavings={handleOpenAddToday} currencySymbol={currencySymbol} user={user} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {/* Header Greeting */}

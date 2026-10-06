@@ -35,21 +35,24 @@ export default function Navbar({ onOpenAddSavings, currencySymbol = "₱", user:
       setCurrentUser(initialUser);
       return;
     }
+    // Only check if we don't have a user yet
+    if (currentUser) return;
+
     const checkUser = async () => {
       try {
         const res = await fetch("/api/auth/me");
         if (res.ok) {
           const data = await res.json();
           setCurrentUser(data.user);
-        } else {
+        } else if (res.status === 401) {
           setCurrentUser(null);
         }
       } catch {
-        setCurrentUser(null);
+        // network error, retain current state
       }
     };
     checkUser();
-  }, [initialUser, pathname]);
+  }, [initialUser]);
 
   // Periodic check for email notifications in dev/preview
   useEffect(() => {

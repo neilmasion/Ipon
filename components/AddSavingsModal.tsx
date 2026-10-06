@@ -119,8 +119,8 @@ export default function AddSavingsModal({
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to record savings");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || `Failed to record savings (Status ${res.status})`);
       }
 
       onSuccess();

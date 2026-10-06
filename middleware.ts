@@ -37,9 +37,14 @@ export function middleware(request: NextRequest) {
       request.headers.get("x-real-ip") ||
       "127.0.0.1";
 
-    const isAuthRoute = pathname.startsWith("/api/auth/");
-    const limitKey = `${clientIp}:${isAuthRoute ? "auth" : "api"}`;
-    const maxRequests = isAuthRoute ? 15 : 150; // 15 auth attempts / 150 general api per minute
+    const isStrictAuthRoute = 
+      pathname === "/api/auth/login" ||
+      pathname === "/api/auth/register" ||
+      pathname === "/api/auth/forgot-password" ||
+      pathname === "/api/auth/reset-password";
+
+    const limitKey = `${clientIp}:${isStrictAuthRoute ? "auth" : "api"}`;
+    const maxRequests = isStrictAuthRoute ? 25 : 300; // 25 auth attempts / 300 general api per minute
 
     const rateResult = checkRateLimit(limitKey, maxRequests, 60);
 
@@ -84,6 +89,9 @@ export function middleware(request: NextRequest) {
 
   // If unauthenticated and accessing a protected page, redirect to /login
   if (!token && !isPublicPath) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }

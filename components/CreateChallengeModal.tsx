@@ -84,8 +84,8 @@ export default function CreateChallengeModal({
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create challenge");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || `Failed to create challenge (Status ${res.status})`);
       }
 
       onSuccess();

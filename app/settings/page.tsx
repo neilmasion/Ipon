@@ -47,26 +47,27 @@ export default function SettingsPage() {
     async function loadSettings() {
       try {
         const res = await fetch("/api/settings");
-        if (!res.ok) {
+        if (res.status === 401) {
           router.replace("/login");
           return;
         }
-        const data = await res.json();
-        setUser(data.user);
-        setName(data.user?.name || "");
-        setCurrency(data.user?.currency || "PHP");
-        setCurrencySymbol(data.user?.currencySymbol || "₱");
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+          setName(data.user?.name || "");
+          setCurrency(data.user?.currency || "PHP");
+          setCurrencySymbol(data.user?.currencySymbol || "₱");
 
-        if (data.reminder) {
-          setRemindersEnabled(data.reminder.enabled);
-          setReminderTime(data.reminder.reminderTime || "20:00");
-          setNotifyMissed(data.reminder.notifyMissed);
-          setNotifyStreak(data.reminder.notifyStreak);
-          setNotifyMilestone(data.reminder.notifyMilestone);
+          if (data.reminder) {
+            setRemindersEnabled(data.reminder.enabled);
+            setReminderTime(data.reminder.reminderTime || "20:00");
+            setNotifyMissed(data.reminder.notifyMissed);
+            setNotifyStreak(data.reminder.notifyStreak);
+            setNotifyMilestone(data.reminder.notifyMilestone);
+          }
         }
       } catch (err) {
-        console.error(err);
-        router.replace("/login");
+        console.error("Failed to load settings:", err);
       } finally {
         setLoading(false);
       }
@@ -115,9 +116,13 @@ export default function SettingsPage() {
         }),
       });
 
-      const data = await res.json();
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {}
+
       if (!res.ok) {
-        throw new Error(data.error || "Failed to update settings");
+        throw new Error(data?.error || `Failed to update settings (Status ${res.status})`);
       }
 
       setStatusMessage("Settings updated successfully!");
@@ -158,7 +163,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-        <Navbar currencySymbol={currencySymbol} />
+        <Navbar currencySymbol={currencySymbol} user={user} />
         <LoadingScreen message="Loading settings..." subMessage="Fetching preferences and notification rules" />
         <BottomNav />
       </div>
@@ -167,7 +172,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-      <Navbar currencySymbol={currencySymbol} />
+      <Navbar currencySymbol={currencySymbol} user={user} />
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         <div className="mb-6">

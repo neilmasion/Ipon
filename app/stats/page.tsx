@@ -18,6 +18,7 @@ import {
 
 export default function StatsPage() {
   const router = useRouter();
+  const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,9 +30,14 @@ export default function StatsPage() {
           fetch("/api/stats"),
         ]);
 
-        if (!meRes.ok) {
+        if (meRes.status === 401 || res.status === 401) {
           router.replace("/login");
           return;
+        }
+
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          if (meData.user) setUser(meData.user);
         }
 
         if (res.ok) {
@@ -39,8 +45,7 @@ export default function StatsPage() {
           setStats(data.stats);
         }
       } catch (err) {
-        console.error(err);
-        router.replace("/login");
+        console.error("Stats load error:", err);
       } finally {
         setLoading(false);
       }
@@ -48,7 +53,7 @@ export default function StatsPage() {
     loadStats();
   }, [router]);
 
-  const currencySymbol = stats?.currencySymbol || "₱";
+  const currencySymbol = stats?.currencySymbol || user?.currencySymbol || "₱";
 
   // Calculate highest monthly amount for clean SVG bar chart scaling
   const monthlyTrend = stats?.monthlyTrend || [];
@@ -57,7 +62,7 @@ export default function StatsPage() {
   if (loading) {
     return (
       <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-        <Navbar currencySymbol={currencySymbol} />
+        <Navbar currencySymbol={currencySymbol} user={user} />
         <LoadingScreen message="Loading savings statistics..." subMessage="Calculating completion rates and projection dates" />
         <BottomNav />
       </div>
@@ -66,7 +71,7 @@ export default function StatsPage() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-      <Navbar currencySymbol={currencySymbol} />
+      <Navbar currencySymbol={currencySymbol} user={user} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {/* Header */}

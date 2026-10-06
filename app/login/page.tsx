@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PiggyBank, Lock, Mail, ArrowRight, AlertCircle, Sparkles, UserCheck, LogOut } from "lucide-react";
+import { PiggyBank, Lock, Mail, ArrowRight, AlertCircle, Sparkles, UserCheck, LogOut, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -52,9 +53,15 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // response was not JSON
+      }
+
       if (!res.ok) {
-        throw new Error(data.error || "Failed to log in");
+        throw new Error(data?.error || `Unable to sign in (Status ${res.status}). Please check your connection or credentials.`);
       }
 
       router.push("/");
@@ -103,6 +110,15 @@ export default function LoginPage() {
             }),
           });
         }
+      }
+
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {}
+
+      if (!res.ok) {
+        throw new Error(data?.error || `Failed to load demo (Status ${res.status})`);
       }
 
       router.push("/");
@@ -213,14 +229,29 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-sm focus:outline-none focus:border-ipon-primary focus:ring-2 focus:ring-ipon-primary/10 transition-all"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-3.5 pr-11 py-2.5 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-sm focus:outline-none focus:border-ipon-primary focus:ring-2 focus:ring-ipon-primary/10 transition-all font-medium"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ipon-muted hover:text-ipon-primary transition-colors focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <button
