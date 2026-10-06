@@ -14,6 +14,7 @@ export const viewport: Viewport = {
 };
 
 import CookieConsent from "@/components/CookieConsent";
+import { Analytics } from "@vercel/analytics/next";
 
 export default function RootLayout({
   children,
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-ipon-bg text-ipon-text antialiased selection:bg-ipon-light selection:text-ipon-primary">
         {children}
         <CookieConsent />
+        <Analytics />
       </body>
     </html>
   );
