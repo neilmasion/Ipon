@@ -1,3 +1,8 @@
+// Clean up any extraneous quotes or non-standard formatting in NODE_ENV from hosting providers
+if (process.env.NODE_ENV) {
+  process.env.NODE_ENV = process.env.NODE_ENV.replace(/['"]+/g, '').trim();
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
