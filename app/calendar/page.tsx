@@ -114,27 +114,27 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
+    <div className="min-h-screen pb-24 md:pb-12">
       <Navbar onOpenAddSavings={() => handleDateClick(getTodayDateStr(), 0)} currencySymbol={currencySymbol} user={user} />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-5 sm:pt-6 space-y-4">
         {/* Page Title & Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 text-ipon-primary text-xs font-bold uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-ipon-primary text-[11px] font-bold uppercase tracking-wider">
               <CalendarIcon className="w-3.5 h-3.5" />
               <span>Savings Calendar</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-ipon-text mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-ipon-text mt-0.5">
               Daily Tracking
             </h1>
           </div>
 
           {/* Action buttons & Challenge Selector */}
-          <div className="flex items-center flex-wrap gap-2">
+          <div className="flex items-center flex-wrap gap-1.5">
             <button
               onClick={() => setIsJoinOpen(true)}
-              className="pink-soft-btn px-3 py-2 rounded-2xl text-xs font-bold inline-flex items-center gap-1.5 border border-ipon-primary/10"
+              className="pink-soft-btn px-2.5 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1 border border-ipon-primary/10"
               title="Join a shared challenge via code"
             >
               <UserPlus className="w-3.5 h-3.5" />
@@ -146,7 +146,7 @@ export default function CalendarPage() {
                 <select
                   value={selectedChallengeId}
                   onChange={(e) => handleChallengeChange(e.target.value)}
-                  className="flex-1 sm:flex-initial max-w-[180px] sm:max-w-xs truncate px-3 sm:px-4 py-2 rounded-2xl bg-white border border-ipon-border font-semibold text-xs text-ipon-text shadow-sm focus:outline-none focus:border-ipon-primary transition-all"
+                  className="flex-1 sm:flex-initial max-w-[170px] sm:max-w-xs truncate px-3 py-1.5 rounded-xl glass-input font-bold text-xs text-ipon-text"
                 >
                   {challenges.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -158,10 +158,10 @@ export default function CalendarPage() {
                 {challengeDetails && (
                   <button
                     onClick={() => setIsInviteOpen(true)}
-                    className="pink-soft-btn p-2 rounded-2xl"
+                    className="pink-soft-btn p-1.5 rounded-xl"
                     title="Invite partners or friends"
                   >
-                    <Users className="w-4 h-4 stroke-[2]" />
+                    <Users className="w-3.5 h-3.5 stroke-[2]" />
                   </button>
                 )}
               </>
@@ -169,31 +169,31 @@ export default function CalendarPage() {
 
             <button
               onClick={() => setIsCreateChallengeOpen(true)}
-              className="pink-gradient-btn p-2 rounded-2xl shadow-soft"
+              className="pink-gradient-btn p-1.5 rounded-xl shadow-soft"
               title="Create new challenge"
             >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
           </div>
         </div>
 
         {/* If no challenge */}
         {!loading && challenges.length === 0 && (
-          <div className="bg-white rounded-3xl p-8 text-center border border-ipon-border shadow-soft">
-            <h2 className="text-lg font-bold text-ipon-text mb-2">No active challenge</h2>
-            <p className="text-xs text-ipon-muted mb-4">
+          <div className="glass-card rounded-2xl p-6 text-center shadow-glass">
+            <h2 className="text-base sm:text-lg font-bold text-ipon-text mb-1">No active challenge</h2>
+            <p className="text-xs text-ipon-muted mb-3.5 font-medium">
               Create an Ipon Challenge or join an existing shared one to start logging dates.
             </p>
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-2">
               <button
                 onClick={() => setIsCreateChallengeOpen(true)}
-                className="pink-gradient-btn px-5 py-2.5 rounded-2xl text-xs font-bold shadow-soft"
+                className="pink-gradient-btn px-4 py-2 rounded-xl text-xs font-bold shadow-soft"
               >
                 + Create Ipon Challenge
               </button>
               <button
                 onClick={() => setIsJoinOpen(true)}
-                className="pink-soft-btn px-5 py-2.5 rounded-2xl text-xs font-bold"
+                className="pink-soft-btn px-4 py-2 rounded-xl text-xs font-bold"
               >
                 Join with Code
               </button>
@@ -203,29 +203,29 @@ export default function CalendarPage() {
 
         {/* Challenge Stats Summary Bar */}
         {challengeDetails && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-ipon-border/80 shadow-soft">
-              <span className="text-[11px] text-ipon-muted font-medium block">Daily Target</span>
-              <span className="text-lg font-bold text-ipon-text">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="glass-card glass-card-hover p-3 rounded-xl shadow-glass-sm">
+              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Daily Target</span>
+              <span className="text-base sm:text-lg font-extrabold text-ipon-text">
                 {formatCurrency(challengeDetails.dailyGoal, currencySymbol)}
               </span>
             </div>
-            <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-ipon-border/80 shadow-soft">
-              <span className="text-[11px] text-ipon-muted font-medium block">Total Saved</span>
-              <span className="text-lg font-bold text-ipon-primary">
+            <div className="glass-card glass-card-hover p-3 rounded-xl shadow-glass-sm">
+              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Total Saved</span>
+              <span className="text-base sm:text-lg font-extrabold text-ipon-primary">
                 {formatCurrency(challengeDetails.stats?.totalSaved || 0, currencySymbol)}
               </span>
             </div>
-            <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-ipon-border/80 shadow-soft">
-              <span className="text-[11px] text-ipon-muted font-medium block">Current Streak</span>
-              <span className="text-lg font-bold text-ipon-text flex items-center gap-1">
+            <div className="glass-card glass-card-hover p-3 rounded-xl shadow-glass-sm">
+              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Current Streak</span>
+              <span className="text-base sm:text-lg font-extrabold text-ipon-text flex items-center gap-1">
                 <span>🔥</span>
                 <span>{challengeDetails.stats?.currentStreak || 0}d</span>
               </span>
             </div>
-            <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-ipon-border/80 shadow-soft">
-              <span className="text-[11px] text-ipon-muted font-medium block">Target Progress</span>
-              <span className="text-lg font-bold text-ipon-text">
+            <div className="glass-card glass-card-hover p-3 rounded-xl shadow-glass-sm">
+              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Target Progress</span>
+              <span className="text-base sm:text-lg font-extrabold text-ipon-text">
                 {challengeDetails.stats?.goalProgressPercent || 0}%
               </span>
             </div>

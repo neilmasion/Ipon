@@ -21,7 +21,7 @@ export default function TermsOfServicePage() {
 
           <Link
             href="/"
-            className="pink-soft-btn px-4 py-2 rounded-2xl text-xs font-bold inline-flex items-center gap-1.5 transition-all"
+            className="glass-pill px-4 py-2 rounded-2xl text-xs font-bold inline-flex items-center gap-1.5 transition-all text-ipon-text hover:text-ipon-primary"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to App</span>
@@ -29,14 +29,14 @@ export default function TermsOfServicePage() {
         </div>
 
         {/* Hero Card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-soft border border-ipon-border/80 mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-ipon-light text-ipon-primary flex items-center justify-center mb-4">
+        <div className="glass-card rounded-3xl p-6 sm:p-10 shadow-glass border border-white/80 mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 shadow-sm text-ipon-primary flex items-center justify-center mb-4 backdrop-blur-md">
             <FileCheck className="w-6 h-6 stroke-[2.2]" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-ipon-text mb-2">
             Terms of Service
           </h1>
-          <p className="text-xs sm:text-sm text-ipon-muted">
+          <p className="text-xs sm:text-sm text-ipon-muted font-medium">
             Last updated: October 2026 • Please read these terms carefully before using the Ipon application.
           </p>
         </div>
@@ -44,7 +44,7 @@ export default function TermsOfServicePage() {
         {/* Content Sections */}
         <div className="space-y-6 text-sm text-ipon-text/90 leading-relaxed">
           {/* Section 1 */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-ipon-border/80">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-glass border border-white/80">
             <h2 className="text-base sm:text-lg font-bold text-ipon-text mb-3 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-ipon-primary" />
               1. Acceptance of Terms
@@ -55,7 +55,7 @@ export default function TermsOfServicePage() {
           </div>
 
           {/* Section 2 */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-ipon-border/80">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-glass border border-white/80">
             <h2 className="text-base sm:text-lg font-bold text-ipon-text mb-3 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
               2. Financial Disclaimer & Habit Tracking
@@ -71,7 +71,7 @@ export default function TermsOfServicePage() {
           </div>
 
           {/* Section 3 */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-ipon-border/80">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-glass border border-white/80">
             <h2 className="text-base sm:text-lg font-bold text-ipon-text mb-3 flex items-center gap-2">
               <Shield className="w-4 h-4 text-ipon-primary" />
               3. Account Security & Responsibilities
@@ -85,7 +85,7 @@ export default function TermsOfServicePage() {
           </div>
 
           {/* Section 4 */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-ipon-border/80">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-glass border border-white/80">
             <h2 className="text-base sm:text-lg font-bold text-ipon-text mb-3">
               4. Prohibited Conduct
             </h2>

@@ -76,7 +76,7 @@ export default function CalendarView({
   const weekDayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="bg-white rounded-3xl p-3 sm:p-6 shadow-soft border border-ipon-border/80">
+    <div className="glass-card rounded-3xl p-3 sm:p-6 shadow-glass relative overflow-hidden">
       {/* Calendar Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
         <div>
@@ -88,23 +88,23 @@ export default function CalendarView({
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-ipon-bg p-1 rounded-2xl border border-ipon-border/50 self-end sm:self-auto">
+        <div className="flex items-center gap-1.5 bg-white/60 backdrop-blur-md p-1 rounded-2xl border border-white/80 shadow-glass-sm self-end sm:self-auto">
           <button
             onClick={prevMonth}
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-ipon-muted hover:text-ipon-text hover:bg-white transition-all"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-ipon-muted hover:text-ipon-text hover:bg-white/90 transition-all"
             aria-label="Previous month"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={goToToday}
-            className="px-2.5 py-1 text-xs font-semibold text-ipon-primary hover:bg-white rounded-xl transition-all"
+            className="px-2.5 py-1 text-xs font-bold text-ipon-primary hover:bg-white/90 rounded-xl transition-all"
           >
             Today
           </button>
           <button
             onClick={nextMonth}
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-ipon-muted hover:text-ipon-text hover:bg-white transition-all"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-ipon-muted hover:text-ipon-text hover:bg-white/90 transition-all"
             aria-label="Next month"
           >
             <ChevronRight className="w-4 h-4" />
@@ -171,21 +171,21 @@ export default function CalendarView({
           }[status];
 
           const cardBorder = isDayToday
-            ? "border-2 border-ipon-primary shadow-sm bg-ipon-light/30"
+            ? "border-2 border-ipon-primary shadow-glass-sm bg-white/90"
             : status === "saved"
-            ? "border-emerald-100 bg-emerald-50/20 hover:border-emerald-300"
+            ? "border-emerald-200/80 bg-emerald-50/40 hover:bg-emerald-50/70 hover:border-emerald-300"
             : status === "partial"
-            ? "border-amber-100 bg-amber-50/20 hover:border-amber-300"
+            ? "border-amber-200/80 bg-amber-50/40 hover:bg-amber-50/70 hover:border-amber-300"
             : status === "missed"
-            ? "border-red-100/70 bg-red-50/10 hover:border-red-200"
-            : "border-ipon-border/60 bg-white hover:border-ipon-primary/40";
+            ? "border-red-200/60 bg-red-50/30 hover:bg-red-50/60 hover:border-red-300"
+            : "border-white/80 bg-white/50 hover:bg-white/85 hover:border-ipon-primary/40";
 
           return (
             <button
               key={dateStr}
               type="button"
               onClick={() => onSelectDate(dateStr, userSaved, userNote, dayRecords)}
-              className={`group relative min-h-[3.5rem] h-14 sm:h-20 p-1 sm:p-2 rounded-xl sm:rounded-2xl border text-left flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm ${cardBorder}`}
+              className={`group relative min-h-[3.5rem] h-14 sm:h-20 p-1 sm:p-2 rounded-xl sm:rounded-2xl border text-left flex flex-col justify-between backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glass-sm ${cardBorder}`}
             >
               {/* Top row: day number + contributor avatars + status dot */}
               <div className="flex items-center justify-between w-full">

@@ -13,9 +13,9 @@ export default function LoadingScreen({
 }: LoadingScreenProps) {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 animate-in fade-in duration-300">
-      <div className="relative flex flex-col items-center">
-        {/* Soft pink icon card */}
-        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-ipon-light border border-ipon-primary/15 flex items-center justify-center shadow-soft">
+      <div className="relative flex flex-col items-center glass-card p-8 rounded-3xl shadow-glass border border-white/80 max-w-xs text-center backdrop-blur-2xl">
+        {/* Soft pink glass icon card */}
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/70 border border-white/80 flex items-center justify-center shadow-glass-sm backdrop-blur-md">
           <PiggyBank className="w-8 h-8 sm:w-10 sm:h-10 text-ipon-primary stroke-[2.2] animate-bounce" />
         </div>
 
@@ -30,8 +30,8 @@ export default function LoadingScreen({
         )}
 
         {/* Minimal loading bar */}
-        <div className="w-36 h-1.5 bg-gray-200 rounded-full mt-4 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-ipon-primary to-pink-400 rounded-full animate-pulse w-full" />
+        <div className="w-36 h-1.5 bg-pink-100/60 rounded-full mt-4 overflow-hidden border border-white/50">
+          <div className="h-full bg-gradient-to-r from-ipon-primary to-pink-400 rounded-full animate-pulse w-full shadow-glow" />
         </div>
       </div>
     </div>

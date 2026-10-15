@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PiggyBank, Lock, Mail, ArrowRight, AlertCircle, Sparkles, UserCheck, LogOut, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, ArrowRight, AlertCircle, Sparkles, UserCheck, LogOut, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -131,28 +131,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-ipon-bg">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-3xl bg-ipon-light mx-auto flex items-center justify-center text-ipon-primary border border-ipon-primary/10 shadow-soft mb-3">
-            <PiggyBank className="w-7 h-7 stroke-[2.2]" />
-          </div>
-          <h1 className="text-2xl font-extrabold text-ipon-text tracking-tight">
-            Ipon
-          </h1>
-          <p className="text-xs text-ipon-muted mt-1">
-            Build your daily saving habit, one day at a time
-          </p>
-        </div>
-
         {/* Card */}
-        <div className="bg-white rounded-3xl p-7 shadow-soft border border-ipon-border/80">
+        <div className="glass-modal rounded-3xl p-7 shadow-glass-lg relative overflow-hidden">
           {/* Sign In / Sign Up Switcher Tabs */}
-          <div className="flex rounded-2xl bg-ipon-bg p-1 border border-ipon-border/60 mb-6">
+          <div className="flex rounded-2xl bg-white/50 backdrop-blur-md p-1 border border-white/80 mb-6 shadow-inner">
             <button
               type="button"
-              className="flex-1 py-2 text-xs font-bold rounded-xl bg-white text-ipon-primary shadow-sm"
+              className="flex-1 py-2 text-xs font-bold rounded-xl bg-white text-ipon-primary shadow-sm border border-white"
             >
               Sign In
             </button>
@@ -168,7 +155,7 @@ export default function LoginPage() {
           <p className="text-xs text-ipon-muted mb-5">Sign in to access your savings dashboard</p>
 
           {currentUser && (
-            <div className="mb-5 p-3.5 rounded-2xl bg-ipon-light border border-ipon-primary/20 flex flex-col gap-2">
+            <div className="mb-5 p-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/90 shadow-glass-sm flex flex-col gap-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-ipon-text">
                 <UserCheck className="w-4 h-4 text-ipon-primary shrink-0" />
                 <span>Currently signed in as <strong className="text-ipon-primary">{currentUser.name || currentUser.email}</strong></span>
@@ -194,7 +181,7 @@ export default function LoginPage() {
           )}
 
           {error && (
-            <div className="mb-4 p-3 rounded-2xl bg-red-50 text-red-600 text-xs flex items-center gap-2 border border-red-100">
+            <div className="mb-4 p-3 rounded-2xl bg-red-50/80 backdrop-blur-md text-red-600 text-xs flex items-center gap-2 border border-red-100">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -202,7 +189,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-ipon-text mb-1.5 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-ipon-text mb-1.5 flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-ipon-primary" />
                 <span>Email address</span>
               </label>
@@ -211,7 +198,7 @@ export default function LoginPage() {
                 placeholder="you@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-sm focus:outline-none focus:border-ipon-primary focus:ring-2 focus:ring-ipon-primary/10 transition-all"
+                className="w-full px-3.5 py-2.5 rounded-2xl glass-input text-sm font-medium"
                 required
               />
             </div>
@@ -235,7 +222,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-3.5 pr-11 py-2.5 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-sm focus:outline-none focus:border-ipon-primary focus:ring-2 focus:ring-ipon-primary/10 transition-all font-medium"
+                  className="w-full pl-3.5 pr-11 py-2.5 rounded-2xl glass-input text-sm font-medium"
                   required
                 />
                 <button
@@ -257,7 +244,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="pink-gradient-btn w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-soft disabled:opacity-50 mt-2"
+              className="pink-gradient-btn w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-soft disabled:opacity-50 mt-2 cursor-pointer"
             >
               <span>{loading ? "Signing in..." : "Sign In"}</span>
               <ArrowRight className="w-4 h-4" />
@@ -265,7 +252,7 @@ export default function LoginPage() {
           </form>
 
           {/* Quick Demo Access */}
-          <div className="mt-5 pt-5 border-t border-ipon-border/60 text-center">
+          <div className="mt-5 pt-5 border-t border-white/70 text-center">
             <button
               type="button"
               onClick={handleQuickDemo}

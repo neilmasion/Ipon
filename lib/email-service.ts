@@ -1,3 +1,4 @@
+import nodemailer from "nodemailer";
 import Mailgun from "mailgun.js";
 import FormData from "form-data";
 
@@ -28,10 +29,10 @@ export function getRecentEmails(emailFilter?: string): SentEmail[] {
   return emails;
 }
 
-// Spend cap safeguard (#12): Maximum 5 outgoing emails per recipient per 24 hours
+// Spend cap safeguard: Maximum 10 outgoing emails per recipient per 24 hours
 const recipientSendCounts = new Map<string, { count: number; resetTime: number }>();
 
-function canSendToRecipient(email: string, maxPerDay: number = 5): boolean {
+function canSendToRecipient(email: string, maxPerDay: number = 10): boolean {
   const normalized = email.toLowerCase().trim();
   const now = Date.now();
   const dayMs = 24 * 60 * 60 * 1000;
@@ -57,8 +58,27 @@ export function clearEmails() {
 }
 
 // ---------------------------------------------------------------------------
-// Mailgun Transport
+// Transporters: Free Gmail SMTP (Nodemailer) & Optional Mailgun Fallback
 // ---------------------------------------------------------------------------
+
+function getGmailTransporter() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+
+  if (!user || !pass) {
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: user.trim(),
+      // Remove spaces if user copied Google App Password as "xxxx xxxx xxxx xxxx"
+      pass: pass.replace(/\s+/g, ""),
+    },
+  });
+}
+
 function getMailgunClient() {
   const apiKey = process.env.MAILGUN_API_KEY;
   const domain = process.env.MAILGUN_DOMAIN;
@@ -71,15 +91,14 @@ function getMailgunClient() {
   const mg = mailgun.client({
     username: "api",
     key: apiKey,
-    // If using EU region, uncomment below:
-    // url: "https://api.eu.mailgun.net",
   });
 
   return { mg, domain };
 }
 
 /**
- * Sends an email via Mailgun in production, or logs to in-memory store in dev.
+ * Sends an email via Free Gmail SMTP or Mailgun.
+ * In development without credentials, logs to in-memory store so it never crashes.
  */
 async function sendEmail(
   to: string,
@@ -91,11 +110,31 @@ async function sendEmail(
   // Always store in dev preview
   globalEmailStore._iponEmails?.unshift(emailRecord);
 
+  // 1. Try free Gmail SMTP first
+  const gmailTransporter = getGmailTransporter();
+  if (gmailTransporter) {
+    try {
+      const fromAddress = process.env.EMAIL_FROM || process.env.GMAIL_USER || "Ipon Savings <noreply@ipon.app>";
+      await gmailTransporter.sendMail({
+        from: fromAddress.includes("<") ? fromAddress : `Ipon Savings <${fromAddress}>`,
+        to,
+        subject,
+        text,
+        html,
+      });
+      console.log(`[Ipon Mailer][Gmail SMTP] Real email sent to ${to}: "${subject}"`);
+      return { success: true };
+    } catch (err: any) {
+      console.error(`[Ipon Mailer][Gmail SMTP] Failed to send email to ${to}:`, err?.message || err);
+      return { success: false, reason: err?.message || "Gmail SMTP send failed" };
+    }
+  }
+
+  // 2. Try Mailgun fallback if configured
   const mailgun = getMailgunClient();
   const fromAddress = process.env.MAILGUN_FROM || "Ipon Savings <noreply@ipon.app>";
 
   if (mailgun) {
-    // Production: send real email via Mailgun
     try {
       await mailgun.mg.messages.create(mailgun.domain, {
         from: fromAddress,
@@ -104,17 +143,17 @@ async function sendEmail(
         text,
         html,
       });
-      console.log(`[Ipon Mailer] Email sent to ${to}: "${subject}"`);
+      console.log(`[Ipon Mailer][Mailgun] Email sent to ${to}: "${subject}"`);
       return { success: true };
     } catch (err: any) {
-      console.error(`[Ipon Mailer] Failed to send email to ${to}:`, err?.message || err);
+      console.error(`[Ipon Mailer][Mailgun] Failed to send email to ${to}:`, err?.message || err);
       return { success: false, reason: err?.message || "Mailgun send failed" };
     }
-  } else {
-    // Development: just log
-    console.log(`[Ipon Mailer][DEV] ${subject} → ${to}`);
-    return { success: true };
   }
+
+  // 3. Fallback: Development preview mode
+  console.log(`[Ipon Mailer][DEV PREVIEW] ${subject} → ${to}`);
+  return { success: true };
 }
 
 // ---------------------------------------------------------------------------
@@ -126,14 +165,15 @@ function wrapHtml(title: string, body: string): string {
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
 <body style="margin:0;padding:0;background-color:#FFF5F7;font-family:'Helvetica Neue',Arial,sans-serif;">
-  <div style="max-width:480px;margin:40px auto;background:#fff;border-radius:24px;padding:40px 32px;border:1px solid #FFE0E8;">
+  <div style="max-width:480px;margin:40px auto;background:#fff;border-radius:24px;padding:40px 32px;border:1px solid #FFE0E8;box-shadow:0 4px 20px rgba(255,107,157,0.08);">
     <div style="text-align:center;margin-bottom:24px;">
-      <div style="display:inline-block;width:48px;height:48px;background:#FFE0E8;border-radius:16px;line-height:48px;font-size:24px;">🐷</div>
-      <h2 style="margin:12px 0 4px;color:#1a1a1a;font-size:20px;">${title}</h2>
+      <div style="display:inline-block;width:52px;height:52px;background:#FFE0E8;border-radius:18px;line-height:52px;font-size:26px;">🐷</div>
+      <h2 style="margin:14px 0 4px;color:#1a1a1a;font-size:22px;font-weight:800;">${title}</h2>
     </div>
     ${body}
-    <div style="margin-top:32px;text-align:center;color:#999;font-size:11px;">
-      <p>Ipon — Daily Savings Tracker 💗</p>
+    <div style="margin-top:36px;padding-top:20px;border-top:1px solid #FFEBF0;text-align:center;color:#999;font-size:12px;">
+      <p style="margin:0;">Ipon — Daily Savings Tracker 💗</p>
+      <p style="margin:4px 0 0;font-size:11px;color:#bbb;">Build your habit, one peso at a time.</p>
     </div>
   </div>
 </body>
@@ -142,33 +182,47 @@ function wrapHtml(title: string, body: string): string {
 
 function buttonHtml(url: string, label: string): string {
   return `<div style="text-align:center;margin:24px 0;">
-    <a href="${url}" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#FF4F81,#FF6B9D);color:#fff;text-decoration:none;border-radius:16px;font-weight:bold;font-size:14px;">${label}</a>
+    <a href="${url}" style="display:inline-block;padding:14px 34px;background:linear-gradient(135deg,#FF4F81,#FF6B9D);color:#fff;text-decoration:none;border-radius:16px;font-weight:bold;font-size:14px;box-shadow:0 4px 12px rgba(255,79,129,0.3);">${label}</a>
   </div>`;
 }
 
 // ---------------------------------------------------------------------------
 // Email Senders
 // ---------------------------------------------------------------------------
-export async function sendVerificationEmail(email: string, token: string, name: string) {
+
+/**
+ * Sends a 6-digit verification code email to verify new accounts.
+ */
+export async function sendVerificationEmail(email: string, code: string, name: string) {
   if (!canSendToRecipient(email)) {
     return { success: false, reason: "Daily email limit reached" };
   }
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const verifyUrl = `${baseUrl}/verify?token=${token}`;
+  const verifyUrl = `${baseUrl}/verify?token=${code}&email=${encodeURIComponent(email)}`;
 
-  const text = `Hi ${name},\n\nWelcome to Ipon! Please verify your email to start building your daily savings habit:\n${verifyUrl}\n\nHappy saving! 🌸`;
+  const text = `Hi ${name},\n\nWelcome to Ipon! Your 6-digit verification code is:\n\n${code}\n\nEnter this code on the verification screen, or click the link below to verify your account:\n${verifyUrl}\n\nHappy saving! 🌸`;
+  
   const html = wrapHtml(
     "Verify your Email 💗",
-    `<p style="color:#444;font-size:14px;line-height:1.6;">Hi <strong>${name}</strong>,</p>
-     <p style="color:#444;font-size:14px;line-height:1.6;">Welcome to Ipon! Please verify your email to start building your daily savings habit.</p>
-     ${buttonHtml(verifyUrl, "Verify Email")}
-     <p style="color:#999;font-size:12px;text-align:center;">Or copy this link: <a href="${verifyUrl}" style="color:#FF4F81;">${verifyUrl}</a></p>`
+    `<p style="color:#444;font-size:15px;line-height:1.6;">Hi <strong>${name}</strong>,</p>
+     <p style="color:#555;font-size:14px;line-height:1.6;">Welcome to Ipon! Enter this 6-digit verification code to activate your account and start your savings habit:</p>
+     
+     <div style="text-align:center;margin:28px 0;">
+       <div style="display:inline-block;background:#FFF0F4;border:2px dashed #FF4F81;border-radius:18px;padding:16px 32px;letter-spacing:10px;font-size:32px;font-weight:900;color:#FF4F81;font-family:'Courier New',Courier,monospace;">
+         ${code}
+       </div>
+       <p style="color:#999;font-size:12px;margin-top:10px;">This 6-digit code will expire shortly.</p>
+     </div>
+
+     ${buttonHtml(verifyUrl, "Verify with 1-Click")}
+     
+     <p style="color:#999;font-size:12px;text-align:center;line-height:1.5;">Or copy and paste this verification link:<br/><a href="${verifyUrl}" style="color:#FF4F81;word-break:break-all;">${verifyUrl}</a></p>`
   );
 
   const record: SentEmail = {
     id: Math.random().toString(36).substring(2, 9),
     to: email,
-    subject: "Verify your Ipon Account 💗",
+    subject: `Your Ipon verification code: ${code} 💗`,
     type: "verification",
     actionUrl: verifyUrl,
     content: text,

@@ -135,7 +135,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
+    <div className="min-h-screen pb-24 md:pb-12">
       <Navbar onOpenAddSavings={() => setIsAddSavingsOpen(true)} currencySymbol={currencySymbol} user={user} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
@@ -168,10 +168,10 @@ export default function HistoryPage() {
               setActiveFilter("all");
               setSelectedChallengeFilter("");
             }}
-            className={`px-4 py-1.5 rounded-2xl text-xs font-semibold transition-all ${
+            className={`px-4 py-1.5 rounded-2xl text-xs font-bold transition-all ${
               activeFilter === "all"
                 ? "bg-ipon-primary text-white shadow-soft"
-                : "bg-white text-ipon-muted border border-ipon-border hover:text-ipon-text"
+                : "glass-pill text-ipon-muted hover:text-ipon-text hover:bg-white/90"
             }`}
           >
             All Time
@@ -181,10 +181,10 @@ export default function HistoryPage() {
               setActiveFilter("month");
               setSelectedChallengeFilter("");
             }}
-            className={`px-4 py-1.5 rounded-2xl text-xs font-semibold transition-all ${
+            className={`px-4 py-1.5 rounded-2xl text-xs font-bold transition-all ${
               activeFilter === "month"
                 ? "bg-ipon-primary text-white shadow-soft"
-                : "bg-white text-ipon-muted border border-ipon-border hover:text-ipon-text"
+                : "glass-pill text-ipon-muted hover:text-ipon-text hover:bg-white/90"
             }`}
           >
             This Month
@@ -194,10 +194,10 @@ export default function HistoryPage() {
               setActiveFilter("year");
               setSelectedChallengeFilter("");
             }}
-            className={`px-4 py-1.5 rounded-2xl text-xs font-semibold transition-all ${
+            className={`px-4 py-1.5 rounded-2xl text-xs font-bold transition-all ${
               activeFilter === "year"
                 ? "bg-ipon-primary text-white shadow-soft"
-                : "bg-white text-ipon-muted border border-ipon-border hover:text-ipon-text"
+                : "glass-pill text-ipon-muted hover:text-ipon-text hover:bg-white/90"
             }`}
           >
             This Year
@@ -211,7 +211,7 @@ export default function HistoryPage() {
                   setSelectedChallengeFilter(e.target.value);
                   setActiveFilter(e.target.value ? "challenge" : "all");
                 }}
-                className="w-full sm:w-auto px-3 py-1.5 rounded-2xl bg-white border border-ipon-border text-xs font-medium text-ipon-muted focus:text-ipon-text focus:outline-none focus:border-ipon-primary"
+                className="w-full sm:w-auto px-3.5 py-1.5 rounded-2xl glass-input text-xs font-semibold text-ipon-muted focus:text-ipon-text"
               >
                 <option value="">Filter by Challenge...</option>
                 {challenges.map((c) => (
@@ -226,8 +226,8 @@ export default function HistoryPage() {
 
         {/* History Records List */}
         {!loading && records.length === 0 && (
-          <div className="bg-white rounded-3xl p-8 text-center border border-ipon-border shadow-soft">
-            <p className="text-xs text-ipon-muted mb-2">No savings records found.</p>
+          <div className="glass-card rounded-3xl p-8 text-center shadow-glass">
+            <p className="text-xs text-ipon-muted mb-2 font-medium">No savings records found.</p>
             <button
               onClick={() => setIsAddSavingsOpen(true)}
               className="pink-soft-btn px-4 py-2 rounded-xl text-xs font-bold"
@@ -243,7 +243,7 @@ export default function HistoryPage() {
             return (
               <div
                 key={rec.id}
-                className="bg-white rounded-2xl p-3.5 sm:p-5 shadow-soft border border-ipon-border/80 flex items-center justify-between hover:border-ipon-primary/30 transition-all group"
+                className="glass-card glass-card-hover rounded-2xl p-3.5 sm:p-5 shadow-glass-sm flex items-center justify-between transition-all group"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center text-xs font-bold shrink-0 ${
@@ -316,20 +316,20 @@ export default function HistoryPage() {
       {/* Edit Record Modal */}
       {editingRecord && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl border border-ipon-border relative">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-base text-ipon-text">Edit Record</h3>
+          <div className="w-full max-w-sm glass-modal rounded-2xl p-4 sm:p-5 shadow-2xl relative">
+            <div className="flex items-center justify-between mb-3.5">
+              <h3 className="font-bold text-sm sm:text-base text-ipon-text">Edit Record</h3>
               <button
                 onClick={() => setEditingRecord(null)}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-ipon-muted hover:bg-ipon-light"
+                className="w-7 h-7 rounded-full flex items-center justify-center text-ipon-muted hover:bg-white/60"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEdit} className="space-y-3.5">
+            <form onSubmit={handleSaveEdit} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-ipon-text mb-1">
+                <label className="block text-[11px] font-semibold text-ipon-text mb-1">
                   Amount Saved ({currencySymbol})
                 </label>
                 <input
@@ -338,26 +338,26 @@ export default function HistoryPage() {
                   min="0"
                   value={editAmount}
                   onChange={(e) => setEditAmount(e.target.value)}
-                  className="w-full px-3 py-2 rounded-2xl border border-ipon-border text-sm font-bold focus:outline-none focus:border-ipon-primary"
+                  className="w-full px-3 py-2 rounded-xl glass-input text-xs font-bold"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-ipon-text mb-1">
+                <label className="block text-[11px] font-semibold text-ipon-text mb-1">
                   Note (Optional)
                 </label>
                 <input
                   type="text"
                   value={editNote}
                   onChange={(e) => setEditNote(e.target.value)}
-                  className="w-full px-3 py-2 rounded-2xl border border-ipon-border text-xs focus:outline-none focus:border-ipon-primary"
+                  className="w-full px-3 py-2 rounded-xl glass-input text-xs"
                 />
               </div>
 
               <button
                 type="submit"
-                className="pink-gradient-btn w-full py-2.5 rounded-2xl text-xs font-bold mt-2 shadow-soft"
+                className="pink-gradient-btn w-full py-2 rounded-xl text-xs font-bold mt-1.5 shadow-soft"
               >
                 Update Record
               </button>

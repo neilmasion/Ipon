@@ -70,7 +70,7 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
+    <div className="min-h-screen pb-24 md:pb-12">
       <Navbar currencySymbol={currencySymbol} user={user} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
@@ -88,94 +88,94 @@ export default function StatsPage() {
         {/* 5 Key Metric Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
           {/* 1. Total Saved */}
-          <div className="col-span-2 sm:col-span-1 bg-white p-4 sm:p-5 rounded-3xl shadow-soft border border-ipon-border/80 relative overflow-hidden">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-ipon-light flex items-center justify-center text-ipon-primary mb-2 sm:mb-3">
+          <div className="col-span-2 sm:col-span-1 glass-card glass-card-hover p-4 sm:p-5 rounded-3xl shadow-glass relative overflow-hidden">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2 sm:mb-3">
               <Coins className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
             </div>
-            <span className="text-[11px] sm:text-xs text-ipon-muted font-semibold uppercase tracking-wider block">
+            <span className="text-[10px] sm:text-[11px] text-ipon-muted font-bold uppercase tracking-wider block">
               Total Saved
             </span>
-            <div className="text-2xl sm:text-3xl font-black text-ipon-text mt-0.5 truncate">
+            <div className="text-xl sm:text-2xl font-black text-ipon-text mt-0.5 truncate">
               {formatCurrency(stats?.totalSaved || 0, currencySymbol)}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-ipon-muted mt-0.5 sm:mt-1">
+            <p className="text-[10px] text-ipon-muted mt-0.5 font-medium">
               All time lifetime savings
             </p>
           </div>
 
           {/* 2. Saving Days */}
-          <div className="bg-white p-4 sm:p-5 rounded-3xl shadow-soft border border-ipon-border/80">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-ipon-light flex items-center justify-center text-ipon-primary mb-2 sm:mb-3">
-              <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
+          <div className="glass-card glass-card-hover p-3.5 sm:p-4 rounded-2xl shadow-glass">
+            <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2">
+              <CalendarDays className="w-4 h-4 stroke-[2.2]" />
             </div>
-            <span className="text-[11px] sm:text-xs text-ipon-muted font-semibold uppercase tracking-wider block">
+            <span className="text-[10px] sm:text-[11px] text-ipon-muted font-bold uppercase tracking-wider block">
               Saving Days
             </span>
-            <div className="text-xl sm:text-3xl font-black text-ipon-text mt-0.5 truncate">
+            <div className="text-lg sm:text-2xl font-black text-ipon-text mt-0.5 truncate">
               {stats?.savingDays || 0}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-ipon-muted mt-0.5 sm:mt-1">
+            <p className="text-[10px] text-ipon-muted mt-0.5 font-medium">
               Days with savings logged
             </p>
           </div>
 
           {/* 3. Average Daily Saving */}
-          <div className="bg-white p-4 sm:p-5 rounded-3xl shadow-soft border border-ipon-border/80">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-ipon-light flex items-center justify-center text-ipon-primary mb-2 sm:mb-3">
-              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
+          <div className="glass-card glass-card-hover p-3.5 sm:p-4 rounded-2xl shadow-glass">
+            <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2">
+              <TrendingUp className="w-4 h-4 stroke-[2.2]" />
             </div>
-            <span className="text-[11px] sm:text-xs text-ipon-muted font-semibold uppercase tracking-wider block">
+            <span className="text-[10px] sm:text-[11px] text-ipon-muted font-bold uppercase tracking-wider block">
               Daily Average
             </span>
-            <div className="text-xl sm:text-3xl font-black text-ipon-text mt-0.5 truncate">
+            <div className="text-lg sm:text-2xl font-black text-ipon-text mt-0.5 truncate">
               {formatCurrency(stats?.averageDailySaving || 0, currencySymbol)}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-ipon-muted mt-0.5 sm:mt-1">
+            <p className="text-[10px] text-ipon-muted mt-0.5 font-medium">
               Per active saving day
             </p>
           </div>
 
           {/* 4. Current Streak */}
-          <div className="bg-white p-4 sm:p-5 rounded-3xl shadow-soft border border-ipon-border/80">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-ipon-light flex items-center justify-center text-ipon-primary mb-2 sm:mb-3">
-              <Flame className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
+          <div className="glass-card glass-card-hover p-3.5 sm:p-4 rounded-2xl shadow-glass">
+            <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2">
+              <Flame className="w-4 h-4 stroke-[2.2]" />
             </div>
-            <span className="text-[11px] sm:text-xs text-ipon-muted font-semibold uppercase tracking-wider block">
+            <span className="text-[10px] sm:text-[11px] text-ipon-muted font-bold uppercase tracking-wider block">
               Current Streak
             </span>
-            <div className="text-xl sm:text-3xl font-black text-ipon-primary mt-0.5 truncate">
+            <div className="text-lg sm:text-2xl font-black text-ipon-primary mt-0.5 truncate">
               🔥 {stats?.currentStreak || 0}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-ipon-muted mt-0.5 sm:mt-1">
+            <p className="text-[10px] text-ipon-muted mt-0.5 font-medium">
               Consecutive days
             </p>
           </div>
 
           {/* 5. Longest Streak */}
-          <div className="bg-white p-4 sm:p-5 rounded-3xl shadow-soft border border-ipon-border/80">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-ipon-light flex items-center justify-center text-ipon-primary mb-2 sm:mb-3">
-              <Award className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
+          <div className="glass-card glass-card-hover p-3.5 sm:p-4 rounded-2xl shadow-glass">
+            <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2">
+              <Award className="w-4 h-4 stroke-[2.2]" />
             </div>
-            <span className="text-[11px] sm:text-xs text-ipon-muted font-semibold uppercase tracking-wider block">
+            <span className="text-[10px] sm:text-[11px] text-ipon-muted font-bold uppercase tracking-wider block">
               Longest Streak
             </span>
-            <div className="text-xl sm:text-3xl font-black text-ipon-text mt-0.5 truncate">
+            <div className="text-lg sm:text-2xl font-black text-ipon-text mt-0.5 truncate">
               🔥 {stats?.longestStreak || 0}
             </div>
-            <p className="text-[10px] sm:text-[11px] text-ipon-muted mt-0.5 sm:mt-1">
+            <p className="text-[10px] text-ipon-muted mt-0.5 font-medium">
               Personal record streak
             </p>
           </div>
         </div>
 
         {/* Clean Monthly Savings Chart */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-ipon-border/80">
-          <div className="flex items-center justify-between mb-6">
+        <div className="glass-card rounded-2xl p-5 sm:p-6 shadow-glass">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-ipon-text">
+              <h2 className="text-sm sm:text-base font-bold text-ipon-text">
                 Monthly Savings Trend
               </h2>
-              <p className="text-xs text-ipon-muted">
+              <p className="text-[11px] text-ipon-muted">
                 Track your discipline over time
               </p>
             </div>

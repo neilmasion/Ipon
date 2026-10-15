@@ -120,15 +120,15 @@ export default function HomePage() {
     <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
       <Navbar onOpenAddSavings={handleOpenAddToday} currencySymbol={currencySymbol} user={user} />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-5 sm:pt-6">
         {/* Header Greeting */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
-            <div className="flex items-center gap-2 text-ipon-muted text-xs font-semibold uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-ipon-muted text-[11px] font-semibold uppercase tracking-wider">
               <span>{getGreeting()}</span>
               <span>👋</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-ipon-text mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-ipon-text mt-0.5">
               {user?.name ? `${user.name}` : "Welcome to Ipon"}
             </h1>
           </div>
@@ -136,18 +136,18 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setIsJoinOpen(true)}
-              className="pink-soft-btn px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-1.5 border border-ipon-primary/10"
+              className="pink-soft-btn px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-ipon-primary/10"
               title="Join a shared challenge via invite code"
             >
-              <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <UserPlus className="w-3.5 h-3.5" />
               <span>Join Challenge</span>
             </button>
 
             <button
               onClick={handleOpenAddToday}
-              className="pink-gradient-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 shadow-soft"
+              className="pink-gradient-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-soft"
             >
-              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Add Savings</span>
             </button>
           </div>
@@ -155,19 +155,19 @@ export default function HomePage() {
 
         {/* If no challenge exists yet, show friendly starter banner */}
         {!loading && challenges.length === 0 && (
-          <div className="bg-white rounded-3xl p-8 sm:p-10 border border-ipon-border text-center shadow-soft mb-8">
-            <div className="w-16 h-16 rounded-3xl bg-ipon-light text-ipon-primary mx-auto flex items-center justify-center mb-4">
-              <Sparkles className="w-8 h-8 stroke-[2]" />
+          <div className="glass-card rounded-2xl p-6 sm:p-8 text-center shadow-glass mb-6 relative overflow-hidden">
+            <div className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-md text-ipon-primary mx-auto flex items-center justify-center mb-3 border border-white shadow-glass-sm">
+              <Sparkles className="w-6 h-6 stroke-[2]" />
             </div>
-            <h2 className="text-xl font-bold text-ipon-text mb-2">
+            <h2 className="text-lg font-bold text-ipon-text mb-1.5">
               Start Your First Ipon Challenge
             </h2>
-            <p className="text-xs sm:text-sm text-ipon-muted max-w-md mx-auto mb-6">
+            <p className="text-xs text-ipon-muted max-w-md mx-auto mb-5">
               Pick a small daily target like {currencySymbol}50. Build momentum, track streaks, and watch your money grow.
             </p>
             <button
               onClick={() => setIsCreateChallengeOpen(true)}
-              className="pink-gradient-btn px-6 py-3 rounded-2xl text-sm font-bold shadow-soft inline-flex items-center gap-2"
+              className="pink-gradient-btn px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-soft inline-flex items-center gap-2"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>Create Ipon Challenge</span>
@@ -177,15 +177,15 @@ export default function HomePage() {
 
         {/* Challenge Switcher if multiple challenges exist */}
         {challenges.length > 1 && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-2.5 mb-3.5 scrollbar-none">
             {challenges.map((c, idx) => (
               <button
                 key={c.id}
                 onClick={() => setActiveChallengeIndex(idx)}
-                className={`px-4 py-1.5 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                   idx === activeChallengeIndex
                     ? "bg-ipon-primary text-white shadow-soft"
-                    : "bg-white text-ipon-muted border border-ipon-border hover:text-ipon-text"
+                    : "glass-pill text-ipon-muted hover:text-ipon-text hover:bg-white/90"
                 }`}
               >
                 {c.name}
@@ -196,33 +196,33 @@ export default function HomePage() {
 
         {/* Highlight Cards Grid */}
         {activeChallenge && (
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-4">
             {/* Primary Hero Card */}
-            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-ipon-border/80 relative overflow-hidden">
+            <div className="glass-hero rounded-2xl p-5 sm:p-7 relative overflow-hidden transition-all">
               {/* Soft pink decorative glow */}
-              <div className="absolute -right-12 -top-12 w-48 h-48 bg-ipon-light/80 rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -right-12 -top-12 w-56 h-56 bg-gradient-to-br from-[#FF4F81]/20 to-pink-200/20 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
                 <div>
-                  <span className="text-xs text-ipon-muted font-semibold uppercase tracking-wider block mb-1">
+                  <span className="text-[11px] text-ipon-muted font-bold uppercase tracking-wider block mb-1">
                     Total Saved
                   </span>
-                  <div className="text-3xl sm:text-5xl font-extrabold text-ipon-text tracking-tight truncate">
+                  <div className="text-2xl sm:text-4xl font-extrabold text-ipon-text tracking-tight truncate">
                     {formatCurrency(stats?.totalSaved || 0, currencySymbol)}
                   </div>
 
                   {/* Expected vs Actual status badge */}
-                  <div className="mt-3 flex items-center gap-2">
-                    <span className="text-xs text-ipon-muted">
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <span className="text-[11px] text-ipon-muted font-medium">
                       Expected: {formatCurrency(stats?.expectedSavings || 0, currencySymbol)}
                     </span>
                     <span className="text-xs text-gray-300">•</span>
                     {stats?.aheadBehind >= 0 ? (
-                      <span className="text-xs font-bold text-ipon-primary flex items-center gap-1 bg-ipon-light px-2.5 py-0.5 rounded-full">
+                      <span className="text-[11px] font-bold text-ipon-primary flex items-center gap-1 bg-white/70 backdrop-blur-md border border-white/80 shadow-glass-sm px-2 py-0.5 rounded-full">
                         🔥 +{formatCurrency(stats?.aheadBehind, currencySymbol)} ahead
                       </span>
                     ) : (
-                      <span className="text-xs font-bold text-amber-600 flex items-center gap-1 bg-amber-50 px-2.5 py-0.5 rounded-full">
+                      <span className="text-[11px] font-bold text-amber-600 flex items-center gap-1 bg-amber-50/80 backdrop-blur-md border border-amber-100 px-2 py-0.5 rounded-full">
                         {formatCurrency(Math.abs(stats?.aheadBehind), currencySymbol)} behind
                       </span>
                     )}
@@ -230,15 +230,15 @@ export default function HomePage() {
                 </div>
 
                 {/* Streak Counter Box */}
-                <div className="flex items-center gap-3 bg-ipon-light/80 border border-ipon-primary/15 rounded-3xl px-5 py-4 self-start sm:self-auto">
-                  <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                    <span className="text-2xl">🔥</span>
+                <div className="flex items-center gap-2.5 bg-white/70 backdrop-blur-md border border-white/90 shadow-glass-sm rounded-2xl px-4 py-3 self-start sm:self-auto">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white to-pink-50 flex items-center justify-center shadow-glass-sm border border-white">
+                    <span className="text-xl">🔥</span>
                   </div>
                   <div>
-                    <div className="text-2xl font-black text-ipon-primary">
+                    <div className="text-xl font-black text-ipon-primary">
                       {streak} {streak === 1 ? "Day" : "Days"}
                     </div>
-                    <p className="text-[11px] font-semibold text-ipon-muted uppercase tracking-wider">
+                    <p className="text-[10px] font-bold text-ipon-muted uppercase tracking-wider">
                       Saving Streak
                     </p>
                   </div>
@@ -246,61 +246,61 @@ export default function HomePage() {
               </div>
 
               {/* Sub-grid: Today's Goal, Saved Today, Goal Progress */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mt-8 pt-6 border-t border-ipon-border/60">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 mt-6 pt-5 border-t border-white/70">
                 {/* 1. Today's Goal */}
-                <div className="p-4 rounded-2xl bg-ipon-bg/60 border border-ipon-border/40">
-                  <span className="text-xs text-ipon-muted font-medium block mb-1">
+                <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all">
+                  <span className="text-[11px] text-ipon-muted font-medium block mb-0.5">
                     Today&apos;s Goal
                   </span>
-                  <div className="text-xl font-bold text-ipon-text">
+                  <div className="text-lg font-bold text-ipon-text">
                     {formatCurrency(dailyGoal, currencySymbol)}
                   </div>
-                  <span className="text-[11px] text-ipon-muted mt-1 block">
+                  <span className="text-[10px] text-ipon-muted mt-0.5 block">
                     Target to maintain streak
                   </span>
                 </div>
 
                 {/* 2. Saved Today */}
-                <div className="p-4 rounded-2xl bg-ipon-bg/60 border border-ipon-border/40 flex items-center justify-between">
+                <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all flex items-center justify-between">
                   <div>
-                    <span className="text-xs text-ipon-muted font-medium block mb-1">
+                    <span className="text-[11px] text-ipon-muted font-bold block mb-0.5">
                       Saved Today
                     </span>
-                    <div className="text-xl font-bold text-ipon-text flex items-center gap-1.5">
+                    <div className="text-lg font-bold text-ipon-text flex items-center gap-1.5">
                       <span>{formatCurrency(savedToday, currencySymbol)}</span>
                       {isGoalReachedToday && (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 fill-emerald-50" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 fill-emerald-50" />
                       )}
                     </div>
-                    <span className="text-[11px] text-ipon-muted mt-1 block">
+                    <span className="text-[10px] text-ipon-muted mt-0.5 block">
                       {isGoalReachedToday ? "Target met ✅" : savedToday > 0 ? "Partially saved" : "Not yet logged"}
                     </span>
                   </div>
                   <button
                     onClick={handleOpenAddToday}
-                    className="pink-soft-btn px-3 py-1.5 rounded-xl text-xs font-bold"
+                    className="pink-soft-btn px-2.5 py-1 rounded-lg text-xs font-bold"
                   >
                     {savedToday > 0 ? "Edit" : "Log"}
                   </button>
                 </div>
 
                 {/* 3. Goal Progress */}
-                <div className="p-4 rounded-2xl bg-ipon-bg/60 border border-ipon-border/40">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-ipon-muted font-medium">
+                <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all">
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-[11px] text-ipon-muted font-bold">
                       Goal Progress
                     </span>
-                    <span className="text-xs font-bold text-ipon-primary">
+                    <span className="text-[11px] font-bold text-ipon-primary">
                       {stats?.goalProgressPercent || 0}%
                     </span>
                   </div>
-                  <div className="text-sm font-bold text-ipon-text truncate">
+                  <div className="text-xs font-bold text-ipon-text truncate">
                     {formatCurrency(stats?.totalSaved || 0, currencySymbol)} / {formatCurrency(activeChallenge.targetAmount, currencySymbol)}
                   </div>
                   {/* Progress bar */}
-                  <div className="w-full h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
+                  <div className="w-full h-2 bg-white/80 rounded-full mt-1.5 overflow-hidden p-0.5 border border-white">
                     <div
-                      className="h-full bg-gradient-to-r from-ipon-primary to-pink-400 rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-ipon-primary to-pink-400 rounded-full transition-all duration-500 shadow-sm"
                       style={{ width: `${Math.min(100, stats?.goalProgressPercent || 0)}%` }}
                     />
                   </div>
@@ -308,20 +308,20 @@ export default function HomePage() {
               </div>
 
               {/* Expiring / Completion Date Bar */}
-              <div className="mt-5 pt-4 border-t border-ipon-border/60 flex flex-wrap items-center justify-between text-xs text-ipon-muted gap-2.5">
-                <div className="flex items-center gap-1.5">
+              <div className="mt-4 pt-3.5 border-t border-white/70 flex flex-wrap items-center justify-between text-[11px] text-ipon-muted gap-2">
+                <div className="flex items-center gap-1.5 font-medium">
                   <CalendarIcon className="w-3.5 h-3.5 text-ipon-primary" />
                   <span>Started: <strong className="text-ipon-text">{activeChallenge.startDate}</strong></span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 bg-ipon-light/60 px-3 py-1 rounded-xl border border-ipon-primary/10">
-                    <Clock className="w-3.5 h-3.5 text-ipon-primary" />
+                <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 bg-white/70 backdrop-blur-md px-2.5 py-0.5 rounded-lg border border-white/80 shadow-glass-sm">
+                    <Clock className="w-3 h-3 text-ipon-primary" />
                     <span>
                       Expiring Date: <strong className="text-ipon-primary">{activeChallenge.endDate || expiring?.formattedDate}</strong>
                       {expiring && (
                         <span className="text-ipon-muted ml-1 font-medium">
-                          ({expiring.daysNeeded.toLocaleString()} days total)
+                          ({expiring.daysNeeded.toLocaleString()} days)
                         </span>
                       )}
                     </span>
@@ -330,10 +330,10 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => setIsInviteOpen(true)}
-                    className="pink-soft-btn px-2.5 py-1 rounded-xl text-xs font-bold inline-flex items-center gap-1.5"
+                    className="pink-soft-btn px-2 py-0.5 rounded-lg text-[11px] font-bold inline-flex items-center gap-1"
                     title="Invite partners or friends to save together"
                   >
-                    <Users className="w-3.5 h-3.5" />
+                    <Users className="w-3 h-3" />
                     <span>{activeChallenge.isShared ? "Contributors" : "Invite"}</span>
                   </button>
                 </div>
@@ -350,47 +350,47 @@ export default function HomePage() {
             />
 
             {/* Quick Actions & Navigation Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Calendar Quick Entry Card */}
               <Link
                 href="/calendar"
-                className="bg-white rounded-3xl p-5 shadow-soft border border-ipon-border/80 hover:border-ipon-primary/30 transition-all flex items-center justify-between group"
+                className="glass-card glass-card-hover rounded-2xl p-4 flex items-center justify-between group"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-ipon-light flex items-center justify-center text-ipon-primary group-hover:scale-105 transition-transform">
-                    <CalendarIcon className="w-6 h-6 stroke-[2]" />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm group-hover:scale-105 transition-transform">
+                    <CalendarIcon className="w-5 h-5 stroke-[2]" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-ipon-text group-hover:text-ipon-primary transition-colors">
+                    <h3 className="font-bold text-xs sm:text-sm text-ipon-text group-hover:text-ipon-primary transition-colors">
                       Monthly Calendar
                     </h3>
-                    <p className="text-xs text-ipon-muted">
+                    <p className="text-[11px] text-ipon-muted">
                       View all days, streak status & click to log
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-ipon-muted group-hover:text-ipon-primary group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="w-4 h-4 text-ipon-muted group-hover:text-ipon-primary group-hover:translate-x-0.5 transition-all" />
               </Link>
 
               {/* History Quick Card */}
               <Link
                 href="/history"
-                className="bg-white rounded-3xl p-5 shadow-soft border border-ipon-border/80 hover:border-ipon-primary/30 transition-all flex items-center justify-between group"
+                className="glass-card glass-card-hover rounded-2xl p-4 flex items-center justify-between group"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-ipon-light flex items-center justify-center text-ipon-primary group-hover:scale-105 transition-transform">
-                    <History className="w-6 h-6 stroke-[2]" />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm group-hover:scale-105 transition-transform">
+                    <History className="w-5 h-5 stroke-[2]" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-ipon-text group-hover:text-ipon-primary transition-colors">
+                    <h3 className="font-bold text-xs sm:text-sm text-ipon-text group-hover:text-ipon-primary transition-colors">
                       Savings History
                     </h3>
-                    <p className="text-xs text-ipon-muted">
+                    <p className="text-[11px] text-ipon-muted">
                       Review previous logs & past activity
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-ipon-muted group-hover:text-ipon-primary group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="w-4 h-4 text-ipon-muted group-hover:text-ipon-primary group-hover:translate-x-0.5 transition-all" />
               </Link>
             </div>
 

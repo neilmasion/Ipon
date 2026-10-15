@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
-  PiggyBank, 
   Lock, 
   Mail, 
   User, 
@@ -92,13 +91,13 @@ export default function RegisterPage() {
       }
 
       setSuccessInfo(
-        "Account created! We've sent a verification message to your inbox. You can verify now or explore."
+        "Account created! We've sent a 6-digit verification code to your email. Redirecting to verification..."
       );
 
       setTimeout(() => {
-        router.push("/");
+        router.push(`/verify?email=${encodeURIComponent(email)}`);
         router.refresh();
-      }, 1500);
+      }, 1200);
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
@@ -107,25 +106,12 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-ipon-bg">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-3xl bg-ipon-light mx-auto flex items-center justify-center text-ipon-primary border border-ipon-primary/10 shadow-soft mb-3">
-            <PiggyBank className="w-7 h-7 stroke-[2.2]" />
-          </div>
-          <h1 className="text-2xl font-extrabold text-ipon-text tracking-tight">
-            Ipon
-          </h1>
-          <p className="text-xs text-ipon-muted mt-1">
-            Start your journey towards financial discipline
-          </p>
-        </div>
-
         {/* Card */}
-        <div className="bg-white rounded-3xl p-7 shadow-soft border border-ipon-border/80">
+        <div className="glass-modal rounded-3xl p-7 shadow-glass-lg relative overflow-hidden">
           {/* Sign In / Sign Up Switcher Tabs */}
-          <div className="flex rounded-2xl bg-ipon-bg p-1 border border-ipon-border/60 mb-6">
+          <div className="flex rounded-2xl bg-white/50 backdrop-blur-md p-1 border border-white/80 mb-6 shadow-inner">
             <Link
               href="/login"
               className="flex-1 py-2 text-xs font-semibold rounded-xl text-ipon-muted hover:text-ipon-text text-center transition-colors"
@@ -134,7 +120,7 @@ export default function RegisterPage() {
             </Link>
             <button
               type="button"
-              className="flex-1 py-2 text-xs font-bold rounded-xl bg-white text-ipon-primary shadow-sm"
+              className="flex-1 py-2 text-xs font-bold rounded-xl bg-white text-ipon-primary shadow-sm border border-white"
             >
               Create Account
             </button>
@@ -144,7 +130,7 @@ export default function RegisterPage() {
           <p className="text-xs text-ipon-muted mb-5">Your savings data remains private to you</p>
 
           {currentUser && (
-            <div className="mb-5 p-3.5 rounded-2xl bg-ipon-light border border-ipon-primary/20 flex flex-col gap-2">
+            <div className="mb-5 p-3.5 rounded-2xl bg-white/70 backdrop-blur-md border border-white/90 shadow-glass-sm flex flex-col gap-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-ipon-text">
                 <UserCheck className="w-4 h-4 text-ipon-primary shrink-0" />
                 <span>Currently signed in as <strong className="text-ipon-primary">{currentUser.name || currentUser.email}</strong></span>
@@ -170,14 +156,14 @@ export default function RegisterPage() {
           )}
 
           {error && (
-            <div className="mb-4 p-3 rounded-2xl bg-red-50 text-red-600 text-xs flex items-center gap-2 border border-red-100">
+            <div className="mb-4 p-3 rounded-2xl bg-red-50/80 backdrop-blur-md text-red-600 text-xs flex items-center gap-2 border border-red-100">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successInfo && (
-            <div className="mb-4 p-3.5 rounded-2xl bg-emerald-50 text-emerald-700 text-xs flex items-center gap-2 border border-emerald-100">
+            <div className="mb-4 p-3.5 rounded-2xl bg-emerald-50/80 backdrop-blur-md text-emerald-700 text-xs flex items-center gap-2 border border-emerald-100">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
               <span>{successInfo}</span>
             </div>
@@ -185,37 +171,37 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-ipon-text mb-1.5 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-ipon-text mb-1.5 flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-ipon-primary" />
-                <span>Your Name</span>
+                <span>Username</span>
               </label>
               <input
                 type="text"
-                placeholder="Maria Santos"
+                placeholder="Your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-sm focus:outline-none focus:border-ipon-primary focus:ring-2 focus:ring-ipon-primary/10 transition-all font-medium"
+                className="w-full px-3.5 py-2.5 rounded-2xl glass-input text-sm font-medium"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ipon-text mb-1.5 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-ipon-text mb-1.5 flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-ipon-primary" />
                 <span>Email address</span>
               </label>
               <input
                 type="email"
-                placeholder="maria@gmail.com"
+                placeholder="yourname@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-sm focus:outline-none focus:border-ipon-primary focus:ring-2 focus:ring-ipon-primary/10 transition-all font-medium"
+                className="w-full px-3.5 py-2.5 rounded-2xl glass-input text-sm font-medium"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ipon-text mb-1.5 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-ipon-text mb-1.5 flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-ipon-primary" />
                 <span>Password</span>
               </label>
@@ -226,7 +212,7 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   minLength={8}
-                  className="w-full pl-3.5 pr-11 py-2.5 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-sm focus:outline-none focus:border-ipon-primary focus:ring-2 focus:ring-ipon-primary/10 transition-all font-medium"
+                  className="w-full pl-3.5 pr-11 py-2.5 rounded-2xl glass-input text-sm font-medium"
                   required
                 />
                 <button
@@ -246,7 +232,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ipon-text mb-1.5 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-ipon-text mb-1.5 flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-ipon-primary" />
                 <span>Confirm Password</span>
               </label>
@@ -257,10 +243,10 @@ export default function RegisterPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   minLength={8}
-                  className={`w-full pl-3.5 pr-11 py-2.5 rounded-2xl border bg-ipon-bg/50 text-sm focus:outline-none focus:ring-2 transition-all font-medium ${
+                  className={`w-full pl-3.5 pr-11 py-2.5 rounded-2xl glass-input text-sm font-medium ${
                     confirmPassword && password !== confirmPassword
                       ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                      : "border-ipon-border focus:border-ipon-primary focus:ring-ipon-primary/10"
+                      : ""
                   }`}
                   required
                 />

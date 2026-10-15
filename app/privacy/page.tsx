@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
 
           <Link
             href="/"
-            className="pink-soft-btn px-4 py-2 rounded-2xl text-xs font-bold inline-flex items-center gap-1.5 transition-all"
+            className="glass-pill px-4 py-2 rounded-2xl text-xs font-bold inline-flex items-center gap-1.5 transition-all text-ipon-text hover:text-ipon-primary"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to App</span>
@@ -29,14 +29,14 @@ export default function PrivacyPolicyPage() {
         </div>
 
         {/* Hero Card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-soft border border-ipon-border/80 mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-ipon-light text-ipon-primary flex items-center justify-center mb-4">
+        <div className="glass-card rounded-3xl p-6 sm:p-10 shadow-glass border border-white/80 mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-white/70 border border-white/80 shadow-sm text-ipon-primary flex items-center justify-center mb-4 backdrop-blur-md">
             <ShieldCheck className="w-6 h-6 stroke-[2.2]" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-ipon-text mb-2">
             Privacy Policy
           </h1>
-          <p className="text-xs sm:text-sm text-ipon-muted">
+          <p className="text-xs sm:text-sm text-ipon-muted font-medium">
             Last updated: October 2026 • Your financial habit data is strictly private and secure.
           </p>
         </div>
@@ -44,7 +44,7 @@ export default function PrivacyPolicyPage() {
         {/* Content Sections */}
         <div className="space-y-6 text-sm text-ipon-text/90 leading-relaxed">
           {/* Section 1 */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-ipon-border/80">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-glass border border-white/80">
             <h2 className="text-base sm:text-lg font-bold text-ipon-text mb-3 flex items-center gap-2">
               <Lock className="w-4 h-4 text-ipon-primary" />
               1. Information We Collect
@@ -60,7 +60,7 @@ export default function PrivacyPolicyPage() {
           </div>
 
           {/* Section 2 */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-ipon-border/80">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-glass border border-white/80">
             <h2 className="text-base sm:text-lg font-bold text-ipon-text mb-3 flex items-center gap-2">
               <EyeOff className="w-4 h-4 text-ipon-primary" />
               2. Privacy & Data Separation
@@ -76,13 +76,13 @@ export default function PrivacyPolicyPage() {
           </div>
 
           {/* Section 3 */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-ipon-border/80">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-glass border border-white/80">
             <h2 className="text-base sm:text-lg font-bold text-ipon-text mb-3 flex items-center gap-2">
               <FileText className="w-4 h-4 text-ipon-primary" />
               3. Cookies and Storage
             </h2>
             <p className="text-xs sm:text-sm text-ipon-muted mb-2">
-              We use strictly necessary authentication cookies (<code className="bg-ipon-light text-ipon-primary px-1.5 py-0.5 rounded text-xs">ipon_token</code>) secured with <code className="text-xs">HttpOnly</code>, <code className="text-xs">SameSite=Lax</code>, and <code className="text-xs">Secure</code> flags.
+              We use strictly necessary authentication cookies (<code className="bg-pink-500/10 text-ipon-primary font-bold px-1.5 py-0.5 rounded text-xs border border-pink-400/20">ipon_token</code>) secured with <code className="text-xs">HttpOnly</code>, <code className="text-xs">SameSite=Lax</code>, and <code className="text-xs">Secure</code> flags.
             </p>
             <p className="text-xs sm:text-sm text-ipon-muted">
               These cookies enable secure session persistence and safeguard against Cross-Site Scripting (XSS) and Cross-Site Request Forgery (CSRF).
@@ -90,7 +90,7 @@ export default function PrivacyPolicyPage() {
           </div>
 
           {/* Section 4 */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-ipon-border/80">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 shadow-glass border border-white/80">
             <h2 className="text-base sm:text-lg font-bold text-ipon-text mb-3">
               4. Data Deletion & Rights
             </h2>

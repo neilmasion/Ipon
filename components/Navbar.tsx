@@ -92,26 +92,26 @@ export default function Navbar({ onOpenAddSavings, currencySymbol = "₱", user:
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-ipon-border/60">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-40 w-full bg-white/75 backdrop-blur-2xl border-b border-white/70 shadow-[0_4px_30px_rgba(255,79,129,0.05)] transition-all">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-13 sm:h-14 flex items-center justify-between">
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-2xl bg-ipon-light flex items-center justify-center text-ipon-primary border border-ipon-primary/10 group-hover:scale-105 transition-transform duration-200">
-            <PiggyBank className="w-5 h-5 text-ipon-primary stroke-[2.2]" />
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white/90 shadow-glass-sm group-hover:scale-105 transition-transform duration-200">
+            <PiggyBank className="w-4 h-4 text-ipon-primary stroke-[2.2]" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-xl tracking-tight text-ipon-text">Ipon</span>
-              <span className="inline-block w-2 h-2 rounded-full bg-ipon-primary"></span>
+              <span className="font-extrabold text-base sm:text-lg tracking-tight text-ipon-text">Ipon</span>
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-ipon-primary animate-pulse"></span>
             </div>
-            <p className="text-[10px] text-ipon-muted uppercase tracking-wider font-semibold -mt-1">
+            <p className="text-[9px] text-ipon-muted uppercase tracking-wider font-semibold -mt-1 hidden sm:block">
               Daily Savings
             </p>
           </div>
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1 bg-ipon-bg/80 p-1.5 rounded-full border border-ipon-border/50">
+        <nav className="hidden md:flex items-center gap-1 bg-white/50 backdrop-blur-md p-1 rounded-full border border-white/80 shadow-[inset_0_1px_3px_rgba(0,0,0,0.03)]">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -119,10 +119,10 @@ export default function Navbar({ onOpenAddSavings, currencySymbol = "₱", user:
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs transition-all duration-200 ${
                   isActive
-                    ? "bg-white text-ipon-primary shadow-sm font-semibold"
-                    : "text-ipon-muted hover:text-ipon-text hover:bg-white/50"
+                    ? "bg-white/95 text-ipon-primary shadow-sm font-bold border border-white/90"
+                    : "text-ipon-muted hover:text-ipon-text hover:bg-white/60 font-medium"
                 }`}
               >
                 <Icon className={`w-3.5 h-3.5 ${isActive ? "text-ipon-primary" : "text-ipon-muted"}`} />
@@ -133,16 +133,16 @@ export default function Navbar({ onOpenAddSavings, currencySymbol = "₱", user:
         </nav>
 
         {/* Action Buttons & Auth Controls */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Email Preview Drawer / Link */}
           <Link
             href="/inbox"
             title="Notification Inbox"
-            className="relative p-2 rounded-xl text-ipon-muted hover:text-ipon-primary hover:bg-ipon-light/60 transition-colors"
+            className="relative p-1.5 sm:p-2 rounded-xl text-ipon-muted hover:text-ipon-primary bg-white/40 hover:bg-white/80 border border-white/60 transition-all shadow-sm"
           >
-            <Mail className="w-4 h-4" />
+            <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             {unreadEmails > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-ipon-primary animate-pulse" />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-ipon-primary animate-pulse" />
             )}
           </Link>
 
@@ -150,7 +150,7 @@ export default function Navbar({ onOpenAddSavings, currencySymbol = "₱", user:
           {onOpenAddSavings && (
             <button
               onClick={onOpenAddSavings}
-              className="pink-gradient-btn flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-2xl text-xs font-semibold shadow-soft"
+              className="pink-gradient-btn flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span className="hidden sm:inline">Add Savings</span>
@@ -160,40 +160,40 @@ export default function Navbar({ onOpenAddSavings, currencySymbol = "₱", user:
 
           {/* Auth Display: User Info & Sign Out / Sign In */}
           {currentUser ? (
-            <div className="flex items-center gap-1 sm:gap-2 pl-1 sm:pl-2 border-l border-ipon-border/60">
+            <div className="flex items-center gap-1 sm:gap-1.5 pl-1 sm:pl-1.5 border-l border-white/80">
               <Link
                 href="/settings"
                 title={`Signed in as ${currentUser.name || currentUser.email}`}
-                className="flex items-center gap-1.5 p-1 sm:px-2.5 sm:py-1 rounded-xl bg-ipon-light hover:bg-ipon-primary/10 border border-ipon-primary/15 transition-colors"
+                className="flex items-center gap-1.5 p-1 sm:px-2 sm:py-0.5 rounded-xl bg-white/60 hover:bg-white/90 border border-white/90 shadow-glass-sm transition-all"
               >
-                <div className="w-6 h-6 rounded-full bg-ipon-primary text-white flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm">
+                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-ipon-primary to-pink-400 text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-sm">
                   {(currentUser.name?.[0] || currentUser.email?.[0] || "U").toUpperCase()}
                 </div>
-                <span className="hidden sm:inline text-xs font-semibold text-ipon-text max-w-[85px] truncate">
+                <span className="hidden sm:inline text-xs font-bold text-ipon-text max-w-[85px] truncate">
                   {currentUser.name?.split(" ")[0] || "Account"}
                 </span>
               </Link>
               <button
                 onClick={handleLogout}
                 title="Sign Out"
-                className="p-1.5 sm:p-2 rounded-xl text-ipon-muted hover:text-red-600 hover:bg-red-50 transition-colors"
+                className="p-1.5 rounded-xl text-ipon-muted hover:text-red-600 bg-white/40 hover:bg-red-50/80 border border-white/60 transition-all"
                 aria-label="Sign Out"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 pl-1">
               <Link
                 href="/login"
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-ipon-primary hover:bg-ipon-light transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold text-ipon-primary hover:bg-ipon-light transition-colors"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Sign In</span>
               </Link>
               <Link
                 href="/register"
-                className="pink-gradient-btn hidden sm:inline-flex px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-soft"
+                className="pink-gradient-btn hidden sm:inline-flex px-3 py-1 rounded-xl text-xs font-bold shadow-soft"
               >
                 Sign Up
               </Link>

@@ -31,26 +31,26 @@ export default function ContributorsCard({
   if (contributors.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-3xl p-6 shadow-soft border border-ipon-border/80 relative overflow-hidden">
+    <div className="glass-card rounded-2xl p-4 sm:p-5 shadow-glass relative overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl bg-ipon-light flex items-center justify-center text-ipon-primary">
-            <Users className="w-5 h-5 stroke-[2.2]" />
+      <div className="flex items-center justify-between mb-3.5">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm">
+            <Users className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className="font-bold text-sm sm:text-base text-ipon-text">
+              <h3 className="font-bold text-xs sm:text-sm text-ipon-text">
                 Contributors ({contributors.length})
               </h3>
               {isShared && (
-                <span className="text-[10px] font-bold text-ipon-primary bg-ipon-light px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <Heart className="w-2.5 h-2.5 fill-ipon-primary" />
+                <span className="text-[9px] font-bold text-ipon-primary bg-ipon-light px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                  <Heart className="w-2 h-2 fill-ipon-primary" />
                   <span>Shared</span>
                 </span>
               )}
             </div>
-            <p className="text-xs text-ipon-muted">
+            <p className="text-[11px] text-ipon-muted">
               See who contributed to this savings challenge
             </p>
           </div>
@@ -58,17 +58,17 @@ export default function ContributorsCard({
 
         <button
           onClick={onOpenInvite}
-          className="pink-soft-btn px-3 py-1.5 rounded-2xl text-xs font-bold inline-flex items-center gap-1.5"
+          className="pink-soft-btn px-2.5 py-1 rounded-xl text-xs font-bold inline-flex items-center gap-1"
         >
-          <UserPlus className="w-3.5 h-3.5" />
+          <UserPlus className="w-3 h-3" />
           <span>Invite</span>
         </button>
       </div>
 
       {/* Progress Breakdown Bar if more than 1 contributor */}
       {contributors.length > 1 && totalSaved > 0 && (
-        <div className="mb-4">
-          <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden flex">
+        <div className="mb-3">
+          <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden flex">
             {contributors.map((c, i) => {
               const colors = [
                 "bg-ipon-primary",
@@ -92,7 +92,7 @@ export default function ContributorsCard({
       )}
 
       {/* Contributors List */}
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {contributors.map((contrib, idx) => {
           const colors = [
             "text-ipon-primary bg-ipon-light border-ipon-primary/10",
@@ -105,38 +105,38 @@ export default function ContributorsCard({
           return (
             <div
               key={contrib.userId}
-              className="flex items-center justify-between p-3 rounded-2xl bg-ipon-bg/40 border border-ipon-border/60 hover:border-ipon-primary/20 transition-all"
+              className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/85 hover:border-white transition-all"
             >
-              <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-xs border ${badgeColor}`}>
+              <div className="flex items-center gap-2.5">
+                <div className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-[11px] border ${badgeColor}`}>
                   {contrib.name.slice(0, 1).toUpperCase()}
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs sm:text-sm font-bold text-ipon-text">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-ipon-text">
                       {contrib.name}
                     </span>
                     {contrib.isOwner ? (
-                      <span className="text-[9px] font-bold uppercase tracking-wider bg-ipon-primary text-white px-1.5 py-0.5 rounded-md">
+                      <span className="text-[8px] font-bold uppercase tracking-wider bg-ipon-primary text-white px-1.5 py-0.2 rounded">
                         Creator
                       </span>
                     ) : (
-                      <span className="text-[9px] font-semibold text-ipon-muted bg-white border border-ipon-border px-1.5 py-0.5 rounded-md">
+                      <span className="text-[8px] font-semibold text-ipon-muted bg-white border border-ipon-border px-1.5 py-0.2 rounded">
                         Contributor
                       </span>
                     )}
                   </div>
-                  <span className="text-[11px] text-ipon-muted">
+                  <span className="text-[10px] text-ipon-muted">
                     {contrib.savingDays} {contrib.savingDays === 1 ? "day" : "days"} logged
                   </span>
                 </div>
               </div>
 
               <div className="text-right">
-                <span className="text-sm sm:text-base font-extrabold text-ipon-text block">
+                <span className="text-xs sm:text-sm font-extrabold text-ipon-text block">
                   {formatCurrency(contrib.totalSaved, currencySymbol)}
                 </span>
-                <span className="text-[10px] font-bold text-ipon-primary">
+                <span className="text-[9px] font-bold text-ipon-primary">
                   {contrib.percentOfTotal}% of total
                 </span>
               </div>

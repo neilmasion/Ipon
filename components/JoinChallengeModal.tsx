@@ -61,48 +61,48 @@ export default function JoinChallengeModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-md max-h-[92vh] overflow-y-auto bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-ipon-border/80 relative"
+        className="w-full max-w-[380px] max-h-[92vh] overflow-y-auto glass-modal rounded-2xl p-4 sm:p-5 shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-ipon-primary via-pink-400 to-ipon-primary" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-ipon-primary via-pink-400 to-ipon-primary" />
 
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-ipon-light flex items-center justify-center text-ipon-primary">
-              <UserPlus className="w-4 h-4 stroke-[2.2]" />
+            <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm">
+              <UserPlus className="w-3.5 h-3.5 stroke-[2.2]" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-ipon-text">Join Shared Challenge</h3>
-              <p className="text-xs text-ipon-muted">Save together with your partner or friend</p>
+              <h3 className="font-bold text-base text-ipon-text">Join Shared Challenge</h3>
+              <p className="text-[11px] text-ipon-muted">Save together with your partner or friend</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-ipon-muted hover:text-ipon-text hover:bg-ipon-light/50 transition-colors"
+            className="w-7 h-7 rounded-full flex items-center justify-center text-ipon-muted hover:text-ipon-text hover:bg-white/60 transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-2xl bg-red-50 text-red-600 text-xs flex items-center gap-2 border border-red-100">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="mb-3 p-2.5 rounded-xl bg-red-50/80 backdrop-blur-md text-red-600 text-xs flex items-center gap-2 border border-red-100">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="mb-4 p-3 rounded-2xl bg-emerald-50 text-emerald-700 text-xs flex items-center gap-2 border border-emerald-100">
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          <div className="mb-3 p-2.5 rounded-xl bg-emerald-50/80 backdrop-blur-md text-emerald-700 text-xs flex items-center gap-2 border border-emerald-100">
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
             <span>{successMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-semibold text-ipon-text mb-1.5">
+            <label className="block text-[11px] font-bold text-ipon-text mb-1">
               Enter Invite Code
             </label>
             <input
@@ -110,20 +110,20 @@ export default function JoinChallengeModal({
               placeholder="e.g. IPON-7K9X2B"
               value={inviteCode}
               onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-              className="w-full px-3.5 py-3 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-base font-mono font-bold tracking-wider text-ipon-text uppercase focus:outline-none focus:border-ipon-primary focus:ring-2 focus:ring-ipon-primary/10 transition-all text-center"
+              className="w-full px-3 py-2 rounded-xl glass-input text-sm font-black tracking-wider uppercase text-center"
               autoFocus
               required
             />
-            <p className="text-[11px] text-ipon-muted mt-1.5 text-center">
+            <p className="text-[10px] text-ipon-muted mt-1 text-center">
               Ask the challenge creator for their 6-character code.
             </p>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-1.5">
             <button
               type="submit"
               disabled={loading}
-              className="pink-gradient-btn w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-soft disabled:opacity-50"
+              className="pink-gradient-btn w-full py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-soft disabled:opacity-50"
             >
               <span>{loading ? "Joining..." : "Join Challenge"}</span>
             </button>

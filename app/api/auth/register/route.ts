@@ -53,7 +53,8 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await hashPassword(password);
-    const verificationToken = crypto.randomBytes(32).toString("hex");
+    // Generate secure 6-digit verification code
+    const verificationToken = crypto.randomInt(100000, 1000000).toString();
 
     // Create user with default reminder settings
     const newUser = await prisma.user.create({
@@ -90,7 +91,8 @@ export async function POST(req: Request) {
 
     const response = NextResponse.json(
       {
-        message: "Registration successful. Please verify your email.",
+        message: "Registration successful. A 6-digit verification code has been sent to your email.",
+        email: newUser.email,
         user: toSafeUser(newUser),
       },
       { status: 201 }

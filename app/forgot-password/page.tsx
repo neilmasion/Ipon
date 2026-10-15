@@ -43,9 +43,9 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-ipon-bg">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-3xl p-7 shadow-soft border border-ipon-border/80">
+        <div className="glass-modal rounded-3xl p-7 shadow-glass-lg relative overflow-hidden">
           <Link
             href="/login"
             className="text-xs font-semibold text-ipon-muted hover:text-ipon-text inline-flex items-center gap-1.5 mb-5"
@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
                 placeholder="you@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl border border-ipon-border bg-ipon-bg/50 text-sm focus:outline-none focus:border-ipon-primary"
+                className="w-full px-3.5 py-2.5 rounded-2xl glass-input text-sm font-medium"
                 required
               />
             </div>
