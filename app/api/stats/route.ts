@@ -14,10 +14,41 @@ export async function GET() {
 
     const todayStr = getTodayDateStr();
 
-    // Fetch all savings records for user
-    const records = await prisma.savingsRecord.findMany({
-      where: { userId: user.id },
-      orderBy: { date: "asc" },
+    // Fetch all savings records for user and active challenges
+    const [records, challenges] = await Promise.all([
+      prisma.savingsRecord.findMany({
+        where: { userId: user.id },
+        orderBy: { date: "asc" },
+      }),
+      prisma.iponChallenge.findMany({
+        where: {
+          OR: [
+            { userId: user.id },
+            { members: { some: { userId: user.id } } },
+          ],
+        },
+      }),
+    ]);
+
+    // Calculate total expected savings across all challenges from start date up to today
+    let totalExpectedSavings = 0;
+    let totalTargetAmount = 0;
+    let maxElapsedDays = 0;
+
+    challenges.forEach((c) => {
+      totalTargetAmount += c.targetAmount;
+      const start = new Date(c.startDate);
+      const today = new Date(todayStr);
+      if (today >= start) {
+        let effectiveEnd = today;
+        if (c.endDate) {
+          const end = new Date(c.endDate);
+          if (end < effectiveEnd) effectiveEnd = end;
+        }
+        const diffDays = Math.max(0, Math.floor((effectiveEnd.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+        totalExpectedSavings += diffDays * c.dailyGoal;
+        if (diffDays > maxElapsedDays) maxElapsedDays = diffDays;
+      }
     });
 
     let totalSaved = 0;
@@ -65,9 +96,15 @@ export async function GET() {
         amount,
       }));
 
+    const aheadBehind = totalSaved - totalExpectedSavings;
+
     return NextResponse.json({
       stats: {
         totalSaved,
+        totalExpectedSavings,
+        aheadBehind,
+        totalTargetAmount,
+        maxElapsedDays,
         savedToday,
         savingDays,
         currentStreak,

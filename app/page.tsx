@@ -212,18 +212,20 @@ export default function HomePage() {
                   </div>
 
                   {/* Expected vs Actual status badge */}
-                  <div className="mt-2.5 flex items-center gap-2">
-                    <span className="text-[11px] text-ipon-muted font-medium">
-                      Expected: {formatCurrency(stats?.expectedSavings || 0, currencySymbol)}
+                  <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] font-semibold text-ipon-primary bg-white/70 backdrop-blur-md border border-white/80 shadow-glass-sm px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                      <span>Target by Today:</span>
+                      <strong>{formatCurrency(stats?.expectedSavings || 0, currencySymbol)}</strong>
+                      <span className="text-ipon-muted font-normal text-[10px]">({stats?.elapsedDays || 0}d)</span>
                     </span>
-                    <span className="text-xs text-gray-300">•</span>
+                    <span className="text-xs text-gray-300 hidden sm:inline">•</span>
                     {stats?.aheadBehind >= 0 ? (
-                      <span className="text-[11px] font-bold text-ipon-primary flex items-center gap-1 bg-white/70 backdrop-blur-md border border-white/80 shadow-glass-sm px-2 py-0.5 rounded-full">
+                      <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1 bg-emerald-50/80 backdrop-blur-md border border-emerald-100 px-2 py-0.5 rounded-full">
                         🔥 +{formatCurrency(stats?.aheadBehind, currencySymbol)} ahead
                       </span>
                     ) : (
                       <span className="text-[11px] font-bold text-amber-600 flex items-center gap-1 bg-amber-50/80 backdrop-blur-md border border-amber-100 px-2 py-0.5 rounded-full">
-                        {formatCurrency(Math.abs(stats?.aheadBehind), currencySymbol)} behind
+                        {formatCurrency(Math.abs(stats?.aheadBehind), currencySymbol)} behind schedule
                       </span>
                     )}
                   </div>
@@ -245,52 +247,65 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Sub-grid: Today's Goal, Saved Today, Goal Progress */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 mt-6 pt-5 border-t border-white/70">
-                {/* 1. Today's Goal */}
+              {/* Sub-grid: Expected to Date, Today's Goal, Saved Today, Goal Progress */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-6 pt-5 border-t border-white/70">
+                {/* 1. Total Needed by Today (Expected Savings) */}
                 <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all">
-                  <span className="text-[11px] text-ipon-muted font-medium block mb-0.5">
-                    Today&apos;s Goal
+                  <span className="text-[10px] sm:text-[11px] text-ipon-muted font-semibold block mb-0.5 truncate">
+                    Expected to Date
                   </span>
-                  <div className="text-lg font-bold text-ipon-text">
-                    {formatCurrency(dailyGoal, currencySymbol)}
+                  <div className="text-base sm:text-lg font-extrabold text-ipon-text truncate">
+                    {formatCurrency(stats?.expectedSavings || 0, currencySymbol)}
                   </div>
-                  <span className="text-[10px] text-ipon-muted mt-0.5 block">
-                    Target to maintain streak
+                  <span className="text-[10px] text-ipon-muted mt-0.5 block truncate">
+                    {stats?.elapsedDays || 0} days × {formatCurrency(dailyGoal, currencySymbol)}
                   </span>
                 </div>
 
-                {/* 2. Saved Today */}
+                {/* 2. Today's Goal */}
+                <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all">
+                  <span className="text-[10px] sm:text-[11px] text-ipon-muted font-medium block mb-0.5 truncate">
+                    Today&apos;s Goal
+                  </span>
+                  <div className="text-base sm:text-lg font-bold text-ipon-text truncate">
+                    {formatCurrency(dailyGoal, currencySymbol)}
+                  </div>
+                  <span className="text-[10px] text-ipon-muted mt-0.5 block truncate">
+                    Target per day
+                  </span>
+                </div>
+
+                {/* 3. Saved Today */}
                 <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all flex items-center justify-between">
-                  <div>
-                    <span className="text-[11px] text-ipon-muted font-bold block mb-0.5">
+                  <div className="min-w-0 pr-1">
+                    <span className="text-[10px] sm:text-[11px] text-ipon-muted font-bold block mb-0.5 truncate">
                       Saved Today
                     </span>
-                    <div className="text-lg font-bold text-ipon-text flex items-center gap-1.5">
-                      <span>{formatCurrency(savedToday, currencySymbol)}</span>
+                    <div className="text-base sm:text-lg font-bold text-ipon-text flex items-center gap-1.5 truncate">
+                      <span className="truncate">{formatCurrency(savedToday, currencySymbol)}</span>
                       {isGoalReachedToday && (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 fill-emerald-50" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 fill-emerald-50 shrink-0" />
                       )}
                     </div>
-                    <span className="text-[10px] text-ipon-muted mt-0.5 block">
+                    <span className="text-[10px] text-ipon-muted mt-0.5 block truncate">
                       {isGoalReachedToday ? "Target met ✅" : savedToday > 0 ? "Partially saved" : "Not yet logged"}
                     </span>
                   </div>
                   <button
                     onClick={handleOpenAddToday}
-                    className="pink-soft-btn px-2.5 py-1 rounded-lg text-xs font-bold"
+                    className="pink-soft-btn px-2 py-1 rounded-lg text-xs font-bold shrink-0"
                   >
                     {savedToday > 0 ? "Edit" : "Log"}
                   </button>
                 </div>
 
-                {/* 3. Goal Progress */}
+                {/* 4. Goal Progress */}
                 <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all">
                   <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[11px] text-ipon-muted font-bold">
-                      Goal Progress
+                    <span className="text-[10px] sm:text-[11px] text-ipon-muted font-bold truncate">
+                      Progress
                     </span>
-                    <span className="text-[11px] font-bold text-ipon-primary">
+                    <span className="text-[10px] sm:text-[11px] font-bold text-ipon-primary">
                       {stats?.goalProgressPercent || 0}%
                     </span>
                   </div>

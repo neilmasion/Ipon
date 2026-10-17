@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Check, Sparkles, Calendar as CalendarIcon, Tag, AlertCircle } from "lucide-react";
+import { X, Check, Sparkles, Calendar as CalendarIcon, Tag, AlertCircle, Target } from "lucide-react";
 import { formatCurrency, getTodayDateStr } from "@/lib/savings-calculations";
+import { differenceInCalendarDays, parseISO, isBefore } from "date-fns";
 
 interface ChallengeOption {
   id: string;
   name: string;
   dailyGoal: number;
+  startDate?: string;
+  endDate?: string | null;
   connectedGoalId?: string | null;
 }
 
@@ -61,6 +64,22 @@ export default function AddSavingsModal({
   const currentChallenge = challenges.find((c) => c.id === selectedChallengeId) || challenges[0];
   const dailyGoal = currentChallenge ? currentChallenge.dailyGoal : 50;
   const numericAmount = parseFloat(amountStr) || 0;
+
+  // Calculate cumulative expected savings up to this selected date
+  let elapsedDaysToDate = 0;
+  let totalNeededToDate = 0;
+  if (currentChallenge?.startDate && date) {
+    try {
+      const start = parseISO(currentChallenge.startDate);
+      const selDate = parseISO(date);
+      if (!isBefore(selDate, start)) {
+        elapsedDaysToDate = differenceInCalendarDays(selDate, start) + 1;
+        totalNeededToDate = elapsedDaysToDate * dailyGoal;
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   // Calculate status preview
   let statusText = "";
@@ -192,10 +211,19 @@ export default function AddSavingsModal({
 
           {/* Date Picker */}
           <div>
-            <label className="block text-[11px] font-bold text-ipon-text mb-1 flex items-center gap-1.5">
-              <CalendarIcon className="w-3 h-3 text-ipon-primary" />
-              <span>Date</span>
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[11px] font-bold text-ipon-text flex items-center gap-1.5">
+                <CalendarIcon className="w-3 h-3 text-ipon-primary" />
+                <span>Date</span>
+              </label>
+              {totalNeededToDate > 0 && (
+                <span className="text-[10px] text-ipon-primary font-semibold flex items-center gap-1 bg-white/70 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/80 shadow-glass-sm">
+                  <span>Target by this date:</span>
+                  <strong>{formatCurrency(totalNeededToDate, currencySymbol)}</strong>
+                  <span className="text-ipon-muted text-[9px]">({elapsedDaysToDate}d)</span>
+                </span>
+              )}
+            </div>
             <input
               type="date"
               value={date}

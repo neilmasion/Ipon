@@ -15,7 +15,8 @@ import {
   Calendar as CalendarIcon, 
   ArrowUpRight,
   X,
-  Plus
+  Plus,
+  Target
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
@@ -160,6 +161,49 @@ export default function HistoryPage() {
             <span>Add Savings</span>
           </button>
         </div>
+
+        {/* Summary Overview Cards */}
+        {(() => {
+          const totalSavedFiltered = records.reduce((sum, r) => sum + r.amountSaved, 0);
+          const activeChal = challenges.find((c) => c.id === selectedChallengeFilter) || challenges[0];
+          return (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 mb-5">
+              <div className="glass-card p-3 sm:p-3.5 rounded-2xl shadow-glass-sm">
+                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Total Logged</span>
+                <span className="text-base sm:text-xl font-extrabold text-ipon-primary">
+                  {formatCurrency(totalSavedFiltered, currencySymbol)}
+                </span>
+                <span className="text-[9px] text-ipon-muted block mt-0.5">{records.length} records in view</span>
+              </div>
+              {activeChal && (
+                <div className="glass-card p-3 sm:p-3.5 rounded-2xl shadow-glass-sm">
+                  <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Target by Today</span>
+                  <span className="text-base sm:text-xl font-extrabold text-ipon-text">
+                    {formatCurrency(activeChal.stats?.expectedSavings || 0, currencySymbol)}
+                  </span>
+                  <span className="text-[9px] text-ipon-muted block mt-0.5 truncate">
+                    {activeChal.stats?.elapsedDays || 0}d ({activeChal.name})
+                  </span>
+                </div>
+              )}
+              {activeChal && (
+                <div className="col-span-2 sm:col-span-1 glass-card p-3 sm:p-3.5 rounded-2xl shadow-glass-sm">
+                  <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Pace Status</span>
+                  <span className="text-base sm:text-xl font-extrabold">
+                    {(activeChal.stats?.aheadBehind || 0) >= 0 ? (
+                      <span className="text-emerald-600">+{formatCurrency(activeChal.stats?.aheadBehind || 0, currencySymbol)} ahead</span>
+                    ) : (
+                      <span className="text-amber-600">-{formatCurrency(Math.abs(activeChal.stats?.aheadBehind || 0), currencySymbol)} behind</span>
+                    )}
+                  </span>
+                  <span className="text-[9px] text-ipon-muted block mt-0.5">
+                    Daily target: {formatCurrency(activeChal.dailyGoal, currencySymbol)}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Filter Pills */}
         <div className="flex flex-wrap items-center gap-2 mb-6">

@@ -75,16 +75,41 @@ export default function CalendarView({
 
   const weekDayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+  // Calculate monthly stats for the active calendar month
+  let monthSaved = 0;
+  let monthElapsedDays = 0;
+  daysInMonth.forEach((day) => {
+    const dStr = format(day, "yyyy-MM-dd");
+    const recs = recordMap.get(dStr) || [];
+    monthSaved += recs.reduce((acc, r) => acc + r.amountSaved, 0);
+
+    const isBeforeStart = isBefore(day, chalStart);
+    const isAfterEnd = chalEnd ? isAfter(day, chalEnd) : false;
+    const isPastOrToday = !isAfter(day, todayDate);
+    if (!isBeforeStart && !isAfterEnd && isPastOrToday) {
+      monthElapsedDays++;
+    }
+  });
+
+  const monthExpected = monthElapsedDays * dailyGoal;
+
   return (
     <div className="glass-card rounded-3xl p-3 sm:p-6 shadow-glass relative overflow-hidden">
       {/* Calendar Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
         <div>
-          <h2 className="text-base sm:text-xl font-bold text-ipon-text">
-            {format(currentMonth, "MMMM yyyy")}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base sm:text-xl font-bold text-ipon-text">
+              {format(currentMonth, "MMMM yyyy")}
+            </h2>
+            {monthExpected > 0 && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/70 backdrop-blur-md border border-white/80 shadow-glass-sm text-ipon-primary">
+                Need: {currencySymbol}{monthExpected.toLocaleString()}
+              </span>
+            )}
+          </div>
           <p className="text-[11px] sm:text-xs text-ipon-muted mt-0.5">
-            Click any day to record your savings
+            Saved {currencySymbol}{monthSaved.toLocaleString()} of {currencySymbol}{monthExpected.toLocaleString()} expected this month
           </p>
         </div>
 

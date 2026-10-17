@@ -13,7 +13,8 @@ import {
   TrendingUp, 
   Award, 
   Coins, 
-  Sparkles 
+  Sparkles,
+  Target
 } from "lucide-react";
 
 export default function StatsPage() {
@@ -85,10 +86,10 @@ export default function StatsPage() {
           </h1>
         </div>
 
-        {/* 5 Key Metric Cards */}
+        {/* 6 Key Metric Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
           {/* 1. Total Saved */}
-          <div className="col-span-2 sm:col-span-1 glass-card glass-card-hover p-4 sm:p-5 rounded-3xl shadow-glass relative overflow-hidden">
+          <div className="glass-card glass-card-hover p-4 sm:p-5 rounded-3xl shadow-glass relative overflow-hidden">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2 sm:mb-3">
               <Coins className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
             </div>
@@ -103,7 +104,31 @@ export default function StatsPage() {
             </p>
           </div>
 
-          {/* 2. Saving Days */}
+          {/* 2. Expected to Date (Total Needed by Today) */}
+          <div className="glass-card glass-card-hover p-4 sm:p-5 rounded-3xl shadow-glass relative overflow-hidden">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2 sm:mb-3">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
+            </div>
+            <span className="text-[10px] sm:text-[11px] text-ipon-muted font-bold uppercase tracking-wider block">
+              Expected to Date
+            </span>
+            <div className="text-xl sm:text-2xl font-black text-ipon-text mt-0.5 truncate">
+              {formatCurrency(stats?.totalExpectedSavings || 0, currencySymbol)}
+            </div>
+            <div className="mt-0.5 flex items-center gap-1">
+              {(stats?.aheadBehind || 0) >= 0 ? (
+                <span className="text-[10px] font-bold text-emerald-600">
+                  🔥 +{formatCurrency(stats?.aheadBehind || 0, currencySymbol)} ahead
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold text-amber-600">
+                  {formatCurrency(Math.abs(stats?.aheadBehind || 0), currencySymbol)} behind schedule
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* 3. Saving Days */}
           <div className="glass-card glass-card-hover p-3.5 sm:p-4 rounded-2xl shadow-glass">
             <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2">
               <CalendarDays className="w-4 h-4 stroke-[2.2]" />
@@ -119,7 +144,7 @@ export default function StatsPage() {
             </p>
           </div>
 
-          {/* 3. Average Daily Saving */}
+          {/* 4. Average Daily Saving */}
           <div className="glass-card glass-card-hover p-3.5 sm:p-4 rounded-2xl shadow-glass">
             <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2">
               <TrendingUp className="w-4 h-4 stroke-[2.2]" />
@@ -135,7 +160,7 @@ export default function StatsPage() {
             </p>
           </div>
 
-          {/* 4. Current Streak */}
+          {/* 5. Current Streak */}
           <div className="glass-card glass-card-hover p-3.5 sm:p-4 rounded-2xl shadow-glass">
             <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2">
               <Flame className="w-4 h-4 stroke-[2.2]" />
@@ -151,7 +176,7 @@ export default function StatsPage() {
             </p>
           </div>
 
-          {/* 5. Longest Streak */}
+          {/* 6. Longest Streak */}
           <div className="glass-card glass-card-hover p-3.5 sm:p-4 rounded-2xl shadow-glass">
             <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm mb-2">
               <Award className="w-4 h-4 stroke-[2.2]" />
