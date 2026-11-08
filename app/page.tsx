@@ -181,6 +181,14 @@ export default function HomePage() {
     return activeChallenge?.dailyGoal || 50;
   }, [activeChallenge?.dailyGoal]);
 
+  // Big amount on hero card: For shared challenge, shows the pooled team total!
+  const heroCardAmount = useMemo(() => {
+    if (activeChallenge?.isShared) {
+      return activeChallenge.stats?.totalSaved || 0;
+    }
+    return totalBalance;
+  }, [activeChallenge, totalBalance]);
+
   const handleOpenAddToday = () => {
     const today = getTodayDateStr();
     setModalDate(today);
@@ -294,7 +302,7 @@ export default function HomePage() {
                   onClick={() => setIsChallengeDropdownOpen(!isChallengeDropdownOpen)}
                   className="flex items-center gap-1.5 text-white/90 text-xs sm:text-sm font-semibold hover:text-white transition-colors"
                 >
-                  <span>Total Balance</span>
+                  <span>{activeChallenge?.isShared ? "Team Pool" : "Total Balance"}</span>
                   {isChallengeDropdownOpen ? (
                     <ChevronUp className="w-3.5 h-3.5 stroke-[2.5]" />
                   ) : (
@@ -329,19 +337,17 @@ export default function HomePage() {
                 </div>
               )}
 
-              {/* Big Main Balance */}
+              {/* Big Main Balance: Shows Team Total Pool if shared */}
               <div className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-5 mb-2 relative z-10">
-                {formatCurrency(totalBalance, currencySymbol)}
+                {formatCurrency(heroCardAmount, currencySymbol)}
               </div>
 
-              {/* Shared challenge pool indicator */}
-              {activeChallenge?.isShared && activeChallenge?.stats?.totalSaved !== undefined && (
+              {/* Shared challenge member breakdown */}
+              {activeChallenge?.isShared && (
                 <div className="text-white/90 text-xs font-semibold mb-4 relative z-10 flex flex-wrap items-center gap-1.5">
                   <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full text-[10px] font-bold">
-                    👥 Team Pool: {formatCurrency(activeChallenge.stats.totalSaved, currencySymbol)}
+                    You: {formatCurrency(incomeAmount, currencySymbol)}
                   </span>
-                  <span className="text-white/60">•</span>
-                  <span className="font-bold">You: {formatCurrency(incomeAmount, currencySymbol)}</span>
                   {activeChallenge.contributors
                     ?.filter((c: any) => c.userId !== user?.id)
                     .map((c: any) => (
@@ -362,7 +368,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <span className="text-white/75 text-xs font-medium block leading-tight">
-                      Income
+                      {activeChallenge?.isShared ? "Your Share" : "Income"}
                     </span>
                     <span className="text-white text-base sm:text-lg font-bold block leading-tight mt-0.5">
                       {formatCurrency(incomeAmount, currencySymbol)}
