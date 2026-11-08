@@ -19,6 +19,7 @@ interface ContributorsCardProps {
   currencySymbol?: string;
   onOpenInvite: () => void;
   isShared?: boolean;
+  currentUserId?: string;
 }
 
 export default function ContributorsCard({
@@ -27,6 +28,7 @@ export default function ContributorsCard({
   currencySymbol = "₱",
   onOpenInvite,
   isShared = false,
+  currentUserId,
 }: ContributorsCardProps) {
   if (contributors.length === 0) return null;
 
@@ -116,13 +118,19 @@ export default function ContributorsCard({
                     <span className="text-xs font-bold text-ipon-text">
                       {contrib.name}
                     </span>
-                    {contrib.isOwner ? (
-                      <span className="text-[8px] font-bold uppercase tracking-wider bg-ipon-primary text-white px-1.5 py-0.2 rounded">
-                        Creator
+                    {contrib.userId === currentUserId && (
+                      <span className="text-[8px] font-extrabold uppercase tracking-wider bg-ipon-primary text-white px-1.5 py-0.2 rounded shadow-xs">
+                        You
                       </span>
-                    ) : (
+                    )}
+                    {contrib.userId !== currentUserId && (
+                      <span className="text-[8px] font-bold uppercase tracking-wider bg-purple-100 text-purple-700 border border-purple-200 px-1.5 py-0.2 rounded">
+                        Partner
+                      </span>
+                    )}
+                    {contrib.isOwner && (
                       <span className="text-[8px] font-semibold text-ipon-muted bg-white border border-ipon-border px-1.5 py-0.2 rounded">
-                        Contributor
+                        Creator
                       </span>
                     )}
                   </div>

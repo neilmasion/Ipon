@@ -192,61 +192,84 @@ export default function CalendarPage() {
         )}
 
         {/* Challenge Stats Summary Bar */}
-        {challengeDetails && (
-          <div className={`grid gap-2.5 ${challengeDetails.isShared || (challengeDetails.contributors && challengeDetails.contributors.length > 1) ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 md:grid-cols-5"}`}>
-            <div className="glass-card p-3 rounded-xl shadow-glass-sm">
-              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Daily Target</span>
-              <span className="text-base sm:text-lg font-extrabold text-ipon-text mt-0.5 block">
-                {formatCurrency(challengeDetails.dailyGoal, currencySymbol)}
-              </span>
-            </div>
+        {challengeDetails && (() => {
+          const isMultiMember = Boolean(
+            challengeDetails.isShared || 
+            (challengeDetails.contributors && challengeDetails.contributors.length > 1)
+          );
+          const otherContributors = (challengeDetails.contributors || []).filter(
+            (c: any) => c.userId !== user?.id
+          );
+          const othersTotalSaved = otherContributors.reduce(
+            (acc: number, c: any) => acc + (c.totalSaved || 0),
+            0
+          );
+          const partnerLabel = otherContributors.length === 1 
+            ? `${otherContributors[0].name.split(" ")[0]}'s Share`
+            : "Partner's Share";
 
-            {/* Individual Savings (Mine) */}
-            {(challengeDetails.isShared || (challengeDetails.contributors && challengeDetails.contributors.length > 1)) && (
-              <div className="glass-card p-3 rounded-xl shadow-glass-sm border border-ipon-primary/20 bg-ipon-light/40">
-                <span className="text-[10px] text-ipon-primary font-bold uppercase tracking-wider flex items-center gap-1">
-                  <span>My Savings</span>
-                  <span className="bg-ipon-primary text-white text-[8px] px-1 py-0.2 rounded font-extrabold">You</span>
-                </span>
-                <span className="text-base sm:text-lg font-extrabold text-ipon-primary mt-0.5 block">
-                  {formatCurrency(challengeDetails.myStats?.totalSaved || 0, currencySymbol)}
+          return (
+            <div className={`grid gap-2.5 ${isMultiMember ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 md:grid-cols-5"}`}>
+              <div className="glass-card p-3 rounded-xl shadow-glass-sm">
+                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Daily Target</span>
+                <span className="text-base sm:text-lg font-extrabold text-ipon-text mt-0.5 block">
+                  {formatCurrency(challengeDetails.dailyGoal, currencySymbol)}
                 </span>
               </div>
-            )}
 
-            {/* Total Pooled Savings */}
-            <div className="glass-card p-3 rounded-xl shadow-glass-sm">
-              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">
-                {challengeDetails.isShared || (challengeDetails.contributors && challengeDetails.contributors.length > 1) ? "Total Saved (Team)" : "Total Saved"}
-              </span>
-              <span className="text-base sm:text-lg font-extrabold text-emerald-600 mt-0.5 block">
-                {formatCurrency(challengeDetails.stats?.totalSaved || 0, currencySymbol)}
-              </span>
-            </div>
+              {/* Individual Savings (Mine) */}
+              {isMultiMember && (
+                <div className="glass-card p-3 rounded-xl shadow-glass-sm border border-ipon-primary/20 bg-ipon-light/40">
+                  <span className="text-[10px] text-ipon-primary font-bold uppercase tracking-wider flex items-center gap-1">
+                    <span>My Savings</span>
+                    <span className="bg-ipon-primary text-white text-[8px] px-1 py-0.2 rounded font-extrabold">You</span>
+                  </span>
+                  <span className="text-base sm:text-lg font-extrabold text-ipon-primary mt-0.5 block">
+                    {formatCurrency(challengeDetails.myStats?.totalSaved || 0, currencySymbol)}
+                  </span>
+                </div>
+              )}
 
-            <div className="glass-card p-3 rounded-xl shadow-glass-sm">
-              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Expected</span>
-              <span className="text-base sm:text-lg font-extrabold text-ipon-text mt-0.5 block">
-                {formatCurrency(challengeDetails.stats?.expectedSavings || 0, currencySymbol)}
-              </span>
-            </div>
+              {/* Other Contributor's Share */}
+              {isMultiMember && (
+                <div className="glass-card p-3 rounded-xl shadow-glass-sm border border-purple-200/60 bg-purple-50/40">
+                  <span className="text-[10px] text-purple-700 font-bold uppercase tracking-wider flex items-center gap-1">
+                    <span>{partnerLabel}</span>
+                    <span className="bg-purple-600 text-white text-[8px] px-1 py-0.2 rounded font-extrabold">Partner</span>
+                  </span>
+                  <span className="text-base sm:text-lg font-extrabold text-purple-700 mt-0.5 block">
+                    {formatCurrency(othersTotalSaved, currencySymbol)}
+                  </span>
+                </div>
+              )}
 
-            <div className="glass-card p-3 rounded-xl shadow-glass-sm">
-              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Streak</span>
-              <span className="text-base sm:text-lg font-extrabold text-ipon-text flex items-center gap-1 mt-0.5">
-                <span>🔥</span>
-                <span>{challengeDetails.myStats?.currentStreak ?? challengeDetails.stats?.currentStreak ?? 0}d</span>
-              </span>
-            </div>
+              {/* Total Pooled Savings */}
+              <div className="glass-card p-3 rounded-xl shadow-glass-sm">
+                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">
+                  {isMultiMember ? "Total Saved (Team)" : "Total Saved"}
+                </span>
+                <span className="text-base sm:text-lg font-extrabold text-emerald-600 mt-0.5 block">
+                  {formatCurrency(challengeDetails.stats?.totalSaved || 0, currencySymbol)}
+                </span>
+              </div>
 
-            <div className="col-span-2 sm:col-span-1 glass-card p-3 rounded-xl shadow-glass-sm">
-              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Progress</span>
-              <span className="text-base sm:text-lg font-extrabold text-ipon-text mt-0.5 block">
-                {challengeDetails.stats?.goalProgressPercent || 0}%
-              </span>
+              <div className="glass-card p-3 rounded-xl shadow-glass-sm">
+                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Streak</span>
+                <span className="text-base sm:text-lg font-extrabold text-ipon-text flex items-center gap-1 mt-0.5">
+                  <span>🔥</span>
+                  <span>{challengeDetails.myStats?.currentStreak ?? challengeDetails.stats?.currentStreak ?? 0}d</span>
+                </span>
+              </div>
+
+              <div className="col-span-2 sm:col-span-1 glass-card p-3 rounded-xl shadow-glass-sm">
+                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Progress</span>
+                <span className="text-base sm:text-lg font-extrabold text-ipon-text mt-0.5 block">
+                  {challengeDetails.stats?.goalProgressPercent || 0}%
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Calendar View Component */}
         {challengeDetails && (
@@ -270,6 +293,7 @@ export default function CalendarPage() {
             currencySymbol={currencySymbol}
             onOpenInvite={() => setIsInviteOpen(true)}
             isShared={challengeDetails.isShared}
+            currentUserId={user?.id}
           />
         )}
       </main>

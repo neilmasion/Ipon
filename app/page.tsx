@@ -336,12 +336,20 @@ export default function HomePage() {
 
               {/* Shared challenge pool indicator */}
               {activeChallenge?.isShared && activeChallenge?.stats?.totalSaved !== undefined && (
-                <div className="text-white/85 text-xs font-semibold mb-4 relative z-10 flex flex-wrap items-center gap-1.5">
+                <div className="text-white/90 text-xs font-semibold mb-4 relative z-10 flex flex-wrap items-center gap-1.5">
                   <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full text-[10px] font-bold">
                     👥 Team Pool: {formatCurrency(activeChallenge.stats.totalSaved, currencySymbol)}
                   </span>
                   <span className="text-white/60">•</span>
-                  <span>Your share: {formatCurrency(incomeAmount, currencySymbol)}</span>
+                  <span className="font-bold">You: {formatCurrency(incomeAmount, currencySymbol)}</span>
+                  {activeChallenge.contributors
+                    ?.filter((c: any) => c.userId !== user?.id)
+                    .map((c: any) => (
+                      <span key={c.userId} className="flex items-center gap-1">
+                        <span className="text-white/60">•</span>
+                        <span>{c.name.split(" ")[0]}: {formatCurrency(c.totalSaved || 0, currencySymbol)}</span>
+                      </span>
+                    ))}
                 </div>
               )}
 
@@ -485,8 +493,11 @@ export default function HomePage() {
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ring-2 ring-transparent group-hover:ring-ipon-primary transition-all ${bgClass}`}>
                           {initial}
                         </div>
-                        <span className="text-[11px] font-semibold text-gray-600 truncate max-w-[55px]">
-                          {firstName}
+                        <span className="text-[11px] font-semibold text-gray-700 truncate max-w-[65px]">
+                          {item.userId === user?.id ? "You" : firstName}
+                        </span>
+                        <span className="text-[10px] font-bold text-ipon-primary">
+                          {formatCurrency(item.totalSaved || 0, currencySymbol)}
                         </span>
                       </div>
                     );

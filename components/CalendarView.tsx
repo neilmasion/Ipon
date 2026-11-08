@@ -127,13 +127,16 @@ export default function CalendarView({
           </div>
           {hasMultipleContributors ? (
             <div className="flex flex-col gap-0.5 mt-0.5">
-              <p className="text-[11px] sm:text-xs text-ipon-muted">
-                <span className="font-semibold text-ipon-primary">My savings:</span>{" "}
-                {currencySymbol}{monthMySaved.toLocaleString()}{" "}
-                <span className="text-ipon-muted/60">•</span>{" "}
-                <span className="font-semibold text-emerald-600">Team total:</span>{" "}
-                {currencySymbol}{monthTotalSaved.toLocaleString()}{" "}
-                <span className="text-ipon-muted/60">of {currencySymbol}{monthExpected.toLocaleString()} expected</span>
+              <p className="text-[11px] sm:text-xs text-ipon-muted flex flex-wrap items-center gap-1.5">
+                <span className="font-semibold text-ipon-primary">You:</span>{" "}
+                <span>{currencySymbol}{monthMySaved.toLocaleString()}</span>
+                <span className="text-ipon-muted/60">•</span>
+                <span className="font-semibold text-purple-600">Partner:</span>{" "}
+                <span>{currencySymbol}{(Math.max(0, monthTotalSaved - monthMySaved)).toLocaleString()}</span>
+                <span className="text-ipon-muted/60">•</span>
+                <span className="font-semibold text-emerald-600">Team Total:</span>{" "}
+                <span>{currencySymbol}{monthTotalSaved.toLocaleString()}</span>
+                <span className="text-ipon-muted/60 font-normal">({currencySymbol}{monthExpected.toLocaleString()} expected)</span>
               </p>
             </div>
           ) : (
@@ -327,8 +330,8 @@ export default function CalendarView({
                         )}
                       </div>
                       {totalAmountSaved > userSaved && (
-                        <div className="text-[8px] sm:text-[9px] font-normal text-emerald-700 truncate">
-                          Team: {currencySymbol}{totalAmountSaved.toLocaleString()}
+                        <div className="text-[8px] sm:text-[9px] font-semibold text-purple-700 truncate">
+                          Partner: +{currencySymbol}{(totalAmountSaved - userSaved).toLocaleString()}
                         </div>
                       )}
                     </div>
@@ -338,8 +341,8 @@ export default function CalendarView({
                       <span className="text-gray-400 text-[8px] sm:text-[9px] block">
                         {currencySymbol}0
                       </span>
-                      <span className="text-[8px] sm:text-[9px] font-semibold text-emerald-700 truncate block">
-                        Team: {currencySymbol}{totalAmountSaved.toLocaleString()}
+                      <span className="text-[8px] sm:text-[9px] font-semibold text-purple-700 truncate block">
+                        Partner: +{currencySymbol}{totalAmountSaved.toLocaleString()}
                       </span>
                     </div>
                   ) : (
