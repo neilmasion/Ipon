@@ -180,7 +180,7 @@ export default function Navbar({ onOpenAddSavings, currencySymbol = "₱", user:
                 title={`Signed in as ${currentUser.name || currentUser.email}`}
                 className="flex items-center gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-2xl bg-white hover:bg-pink-50/50 border border-gray-100 hover:border-pink-200 shadow-sm transition-all"
               >
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-ipon-primary to-pink-400 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm overflow-hidden">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-ipon-primary to-pink-400 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm overflow-hidden">
                   {currentUser.avatarUrl ? (
                     <img 
                       src={currentUser.avatarUrl} 

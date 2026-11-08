@@ -283,7 +283,7 @@ export default function SettingsPage() {
             <div className="space-y-3.5">
               {/* Profile Avatar Upload */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 pb-3 border-b border-white/60">
-                <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-tr from-ipon-primary to-pink-400 text-white flex items-center justify-center text-xl font-bold shrink-0 shadow-md overflow-hidden border-2 border-white">
+                <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-ipon-primary to-pink-400 text-white flex items-center justify-center text-xl font-bold shrink-0 shadow-md overflow-hidden border-2 border-white">
                   {user?.avatarUrl ? (
                     <img
                       src={user.avatarUrl}
