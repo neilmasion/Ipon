@@ -83,18 +83,22 @@ export async function POST(req: Request) {
       },
     });
 
-    // Send verification email (token is only sent in the email, never leaked in API response)
-    await sendVerificationEmail(newUser.email, verificationToken, newUser.name);
-
-    // Send welcome greeting notification
-    await sendWelcomeGreetingEmail(newUser.email, newUser.name);
+    // Send verification & welcome emails safely in background without blocking user registration
+    try {
+      await Promise.allSettled([
+        sendVerificationEmail(newUser.email, verificationToken, newUser.name),
+        sendWelcomeGreetingEmail(newUser.email, newUser.name),
+      ]);
+    } catch (mailErr) {
+      console.warn("[Register] Email send skipped or failed:", mailErr);
+    }
 
     // Sign JWT and set secure cookie
     const token = signToken({ userId: newUser.id, email: newUser.email });
 
     const response = NextResponse.json(
       {
-        message: "Registration successful. A 6-digit verification code has been sent to your email.",
+        message: "Registration successful!",
         email: newUser.email,
         user: toSafeUser(newUser),
       },
@@ -109,7 +113,15 @@ export async function POST(req: Request) {
     });
 
     return response;
-  } catch (error) {
-    return safeErrorResponse(error, "Failed to register user");
+  } catch (error: any) {
+    console.error("[Registration Error]:", error?.message || error);
+    // If it's a database connection error, provide a clear error message
+    if (error?.message?.includes("Can't reach database server") || error?.code === "P1001") {
+      return NextResponse.json(
+        { error: "Database connection failed. Please check your cloud DATABASE_URL in Vercel settings." },
+        { status: 503 }
+      );
+    }
+    return safeErrorResponse(error, error?.message || "Failed to register user");
   }
 }

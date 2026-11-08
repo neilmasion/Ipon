@@ -83,12 +83,17 @@ function getGmailTransporter() {
   }
 
   return nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
     auth: {
       user: user.trim(),
       // Remove spaces if user copied Google App Password as "xxxx xxxx xxxx xxxx"
       pass: pass.replace(/\s+/g, ""),
     },
+    connectionTimeout: 4000, // 4s timeout so serverless doesn't freeze
+    greetingTimeout: 4000,
+    socketTimeout: 5000,
   });
 }
 
