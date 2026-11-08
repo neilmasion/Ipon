@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Lock, Mail, ArrowRight, AlertCircle, Sparkles, UserCheck, LogOut, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, ArrowRight, AlertCircle, UserCheck, LogOut, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -68,63 +68,6 @@ export default function LoginPage() {
       router.refresh();
     } catch (err: any) {
       setError(err.message || "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Quick 1-click Demo Account handler
-  const handleQuickDemo = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      // First try to login demo
-      let res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "demo@ipon.app", password: "password123" }),
-      });
-
-      if (!res.ok) {
-        // If not exists, register demo
-        res = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: "Ipon Saver",
-            email: "demo@ipon.app",
-            password: "password123",
-          }),
-        });
-
-        // Seed initial challenge for the demo user
-        if (res.ok) {
-          await fetch("/api/challenges", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: "New Phone Challenge",
-              startDate: "2026-10-01",
-              dailyGoal: 50,
-              targetAmount: 15000,
-            }),
-          });
-        }
-      }
-
-      let data: any = null;
-      try {
-        data = await res.json();
-      } catch {}
-
-      if (!res.ok) {
-        throw new Error(data?.error || `Failed to load demo (Status ${res.status})`);
-      }
-
-      router.push("/");
-      router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Failed to load demo");
     } finally {
       setLoading(false);
     }
@@ -250,19 +193,6 @@ export default function LoginPage() {
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Demo Access */}
-          <div className="mt-5 pt-5 border-t border-white/70 text-center">
-            <button
-              type="button"
-              onClick={handleQuickDemo}
-              disabled={loading}
-              className="pink-soft-btn w-full py-2.5 rounded-2xl text-xs font-bold inline-flex items-center justify-center gap-2"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-ipon-primary" />
-              <span>Explore Instant Demo Account</span>
-            </button>
-          </div>
         </div>
 
         {/* Footer link */}
