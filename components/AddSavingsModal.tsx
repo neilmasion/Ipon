@@ -57,7 +57,9 @@ export default function AddSavingsModal({
 
   useEffect(() => {
     if (defaultDate) setDate(defaultDate);
-    if (defaultAmount !== undefined) setAmountStr(String(defaultAmount));
+    if (defaultAmount !== undefined) {
+      setAmountStr(defaultAmount > 0 ? String(defaultAmount) : "");
+    }
     if (defaultNote !== undefined) setNote(defaultNote);
   }, [defaultDate, defaultAmount, defaultNote]);
 
@@ -241,7 +243,7 @@ export default function AddSavingsModal({
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-[11px] font-bold text-ipon-text">
-                Amount
+                {dayRecords && dayRecords.length > 0 ? "Your Individual Contribution" : "Amount"}
               </label>
               <span className="text-[11px] text-ipon-muted">
                 Daily Goal: <strong className="text-ipon-text">{formatCurrency(dailyGoal, currencySymbol)}</strong>

@@ -161,17 +161,20 @@ export default function HomePage() {
 
   const stats = useMemo(() => activeChallenge?.stats, [activeChallenge]);
 
-  // Total balance: sum across all challenges
+  // Total balance: sum of what THIS user saved across all challenges
   const totalBalance = useMemo(() => {
     return challenges.length > 0 
-      ? challenges.reduce((acc, c) => acc + (c.stats?.totalSaved || 0), 0)
+      ? challenges.reduce((acc, c) => acc + (c.myStats?.totalSaved ?? (c.isShared ? 0 : c.stats?.totalSaved || 0)), 0)
       : 0;
   }, [challenges]);
 
   // Income / Saved amount
   const incomeAmount = useMemo(() => {
-    return stats?.totalSaved ?? totalBalance;
-  }, [stats?.totalSaved, totalBalance]);
+    if (activeChallenge?.myStats?.totalSaved !== undefined) {
+      return activeChallenge.myStats.totalSaved;
+    }
+    return activeChallenge?.isShared ? 0 : (stats?.totalSaved ?? totalBalance);
+  }, [activeChallenge, stats?.totalSaved, totalBalance]);
 
   // Expenses / Target
   const targetExpenseAmount = useMemo(() => {
@@ -327,9 +330,20 @@ export default function HomePage() {
               )}
 
               {/* Big Main Balance */}
-              <div className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight my-5 relative z-10">
+              <div className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-5 mb-2 relative z-10">
                 {formatCurrency(totalBalance, currencySymbol)}
               </div>
+
+              {/* Shared challenge pool indicator */}
+              {activeChallenge?.isShared && activeChallenge?.stats?.totalSaved !== undefined && (
+                <div className="text-white/85 text-xs font-semibold mb-4 relative z-10 flex flex-wrap items-center gap-1.5">
+                  <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full text-[10px] font-bold">
+                    👥 Team Pool: {formatCurrency(activeChallenge.stats.totalSaved, currencySymbol)}
+                  </span>
+                  <span className="text-white/60">•</span>
+                  <span>Your share: {formatCurrency(incomeAmount, currencySymbol)}</span>
+                </div>
+              )}
 
               {/* Bottom Row inside card: Income vs Expenses */}
               <div className="flex items-center justify-between pt-3 border-t border-white/10 relative z-10">

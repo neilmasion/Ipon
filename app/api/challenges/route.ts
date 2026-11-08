@@ -72,6 +72,24 @@ export async function GET() {
             todayDateStr: todayStr,
           });
 
+          // Current user's individual stats
+          const myUserRecords = c.savingsRecords
+            .filter((r) => r.userId === user.id)
+            .map((r) => ({
+              date: r.date,
+              dailyGoal: r.dailyGoal,
+              amountSaved: r.amountSaved,
+            }));
+
+          const myStats = calculateChallengeStats({
+            startDate: c.startDate,
+            endDate: c.endDate,
+            dailyGoal: c.dailyGoal,
+            targetAmount: c.targetAmount,
+            records: myUserRecords,
+            todayDateStr: todayStr,
+          });
+
           // Contributor breakdown
           const contributorMap = new Map<string, {
             userId: string;
@@ -123,6 +141,7 @@ export async function GET() {
           return {
             ...c,
             stats,
+            myStats,
             contributors,
             isUserOwner: c.userId === user.id,
           };
