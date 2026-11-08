@@ -46,5 +46,7 @@ export async function uploadToR2(
     })
   );
 
-  return publicUrl ? `${publicUrl}/${fileName}` : `/${fileName}`;
+  // Return the secure internal media proxy route so images always load seamlessly
+  // without needing manual public access domain configuration on Cloudflare R2.
+  return `/api/media/${fileName}`;
 }
