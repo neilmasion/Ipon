@@ -25,11 +25,11 @@ export async function GET(
         ],
       },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, name: true, email: true, avatarUrl: true } },
         connectedGoal: true,
         members: {
           include: {
-            user: { select: { id: true, name: true, email: true } },
+            user: { select: { id: true, name: true, email: true, avatarUrl: true } },
           },
         },
         savingsRecords: {
@@ -104,6 +104,7 @@ export async function GET(
       userId: string;
       name: string;
       email: string;
+      avatarUrl: string | null;
       totalSaved: number;
       savingDays: number;
       isOwner: boolean;
@@ -114,6 +115,7 @@ export async function GET(
       userId: challenge.userId,
       name: challenge.user?.name || "Owner",
       email: challenge.user?.email || "",
+      avatarUrl: challenge.user?.avatarUrl || null,
       totalSaved: 0,
       savingDays: 0,
       isOwner: true,
@@ -126,6 +128,7 @@ export async function GET(
           userId: m.userId,
           name: m.user?.name || "Member",
           email: m.user?.email || "",
+          avatarUrl: m.user?.avatarUrl || null,
           totalSaved: 0,
           savingDays: 0,
           isOwner: m.userId === challenge.userId,

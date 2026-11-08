@@ -11,12 +11,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     // Return only current user's in-app notifications (excludes auth security emails like OTPs / reset codes)
-    let notifications = getRecentNotifications(user.email);
-    const hasWelcome = notifications.some((n) => n.type === "welcome");
-    if (!hasWelcome) {
-      await sendWelcomeGreetingEmail(user.email, user.name || "Saver");
-      notifications = getRecentNotifications(user.email);
-    }
+    const notifications = getRecentNotifications(user.email);
     return NextResponse.json({ emails: notifications });
   } catch (error) {
     return NextResponse.json({ emails: [] });

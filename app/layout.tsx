@@ -14,6 +14,11 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Ipon — Minimalist Daily Savings Tracker",
   description: "Build a saving habit, track your money, maintain streaks, and reach your savings goals with a clean, minimalist experience.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export const viewport: Viewport = {

@@ -22,12 +22,9 @@ export default function InboxPage() {
         setEmails(fetched);
 
         // Mark all as read by storing current timestamp
-        if (fetched.length > 0) {
-          const latestTimestamp = Math.max(
-            ...fetched.map((e: any) => new Date(e.timestamp).getTime())
-          );
-          localStorage.setItem("ipon_inbox_last_read", String(latestTimestamp));
-        }
+        try {
+          localStorage.setItem("ipon_inbox_last_read", String(Date.now()));
+        } catch {}
       }
     } catch (err) {
       console.error(err);

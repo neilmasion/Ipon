@@ -7,6 +7,7 @@ export interface ContributorItem {
   userId: string;
   name: string;
   email?: string;
+  avatarUrl?: string | null;
   totalSaved: number;
   savingDays: number;
   isOwner?: boolean;
@@ -110,8 +111,16 @@ export default function ContributorsCard({
               className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/85 hover:border-white transition-all"
             >
               <div className="flex items-center gap-2.5">
-                <div className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-[11px] border ${badgeColor}`}>
-                  {contrib.name.slice(0, 1).toUpperCase()}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-[11px] border overflow-hidden shrink-0 shadow-xs ${badgeColor}`}>
+                  {contrib.avatarUrl ? (
+                    <img
+                      src={contrib.avatarUrl}
+                      alt={contrib.name}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    contrib.name.slice(0, 1).toUpperCase()
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">

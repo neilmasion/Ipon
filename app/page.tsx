@@ -471,8 +471,8 @@ export default function HomePage() {
                 </button>
               </div>
 
-              {/* Horizontal Avatars Row with Pink Plus Button */}
-              <div className="flex items-center gap-3.5 overflow-x-auto pb-2 scrollbar-none">
+              {/* Horizontal Avatars Row with Pink Plus Button (aligned at top so circles are on the same line) */}
+              <div className="flex items-start gap-3.5 overflow-x-auto pb-2 scrollbar-none">
                 {/* Floating Plus Button */}
                 <button
                   onClick={() => setIsInviteOpen(true)}
@@ -489,6 +489,7 @@ export default function HomePage() {
                     const firstName = name.split(" ")[0];
                     const initial = firstName[0]?.toUpperCase() || "U";
                     const bgClass = item.bg || "bg-pink-100 text-ipon-primary";
+                    const avatarSrc = item.avatarUrl || (item.userId === user?.id ? user?.avatarUrl : null);
 
                     return (
                       <div
@@ -496,8 +497,16 @@ export default function HomePage() {
                         onClick={() => setIsInviteOpen(true)}
                         className="flex flex-col items-center gap-1.5 cursor-pointer shrink-0 group"
                       >
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ring-2 ring-transparent group-hover:ring-ipon-primary transition-all ${bgClass}`}>
-                          {initial}
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ring-2 ring-transparent group-hover:ring-ipon-primary transition-all overflow-hidden shrink-0 border border-white/80 shadow-sm ${bgClass}`}>
+                          {avatarSrc ? (
+                            <img
+                              src={avatarSrc}
+                              alt={name}
+                              className="w-full h-full object-cover rounded-full"
+                            />
+                          ) : (
+                            <span>{initial}</span>
+                          )}
                         </div>
                         <span className="text-[11px] font-semibold text-gray-700 truncate max-w-[65px]">
                           {item.userId === user?.id ? "You" : firstName}

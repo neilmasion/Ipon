@@ -191,7 +191,7 @@ export default function CalendarPage() {
           </div>
         )}
 
-        {/* Challenge Stats Summary Bar */}
+        {/* Challenge Stats Summary Bar (Clean 4 Cards) */}
         {challengeDetails && (() => {
           const isMultiMember = Boolean(
             challengeDetails.isShared || 
@@ -204,67 +204,70 @@ export default function CalendarPage() {
             (acc: number, c: any) => acc + (c.totalSaved || 0),
             0
           );
-          const partnerLabel = otherContributors.length === 1 
-            ? `${otherContributors[0].name.split(" ")[0]}'s Share`
-            : "Partner's Share";
+          const partnerName = otherContributors.length === 1 
+            ? otherContributors[0].name.split(" ")[0] 
+            : "Partner";
 
           return (
-            <div className={`grid gap-2.5 ${isMultiMember ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 md:grid-cols-5"}`}>
-              <div className="glass-card p-3 rounded-xl shadow-glass-sm">
-                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Daily Target</span>
-                <span className="text-base sm:text-lg font-extrabold text-ipon-text mt-0.5 block">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+              {/* 1. Daily Target */}
+              <div className="glass-card p-3.5 rounded-2xl shadow-glass-sm">
+                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">
+                  Daily Target
+                </span>
+                <span className="text-lg sm:text-xl font-extrabold text-ipon-text mt-0.5 block">
                   {formatCurrency(challengeDetails.dailyGoal, currencySymbol)}
                 </span>
+                <span className="text-[10px] text-ipon-muted mt-1 block">
+                  Per day goal
+                </span>
               </div>
 
-              {/* Individual Savings (Mine) */}
-              {isMultiMember && (
-                <div className="glass-card p-3 rounded-xl shadow-glass-sm border border-ipon-primary/20 bg-ipon-light/40">
-                  <span className="text-[10px] text-ipon-primary font-bold uppercase tracking-wider flex items-center gap-1">
-                    <span>My Savings</span>
-                    <span className="bg-ipon-primary text-white text-[8px] px-1 py-0.2 rounded font-extrabold">You</span>
-                  </span>
-                  <span className="text-base sm:text-lg font-extrabold text-ipon-primary mt-0.5 block">
-                    {formatCurrency(challengeDetails.myStats?.totalSaved || 0, currencySymbol)}
-                  </span>
-                </div>
-              )}
-
-              {/* Other Contributor's Share */}
-              {isMultiMember && (
-                <div className="glass-card p-3 rounded-xl shadow-glass-sm border border-purple-200/60 bg-purple-50/40">
-                  <span className="text-[10px] text-purple-700 font-bold uppercase tracking-wider flex items-center gap-1">
-                    <span>{partnerLabel}</span>
-                    <span className="bg-purple-600 text-white text-[8px] px-1 py-0.2 rounded font-extrabold">Partner</span>
-                  </span>
-                  <span className="text-base sm:text-lg font-extrabold text-purple-700 mt-0.5 block">
-                    {formatCurrency(othersTotalSaved, currencySymbol)}
-                  </span>
-                </div>
-              )}
-
-              {/* Total Pooled Savings */}
-              <div className="glass-card p-3 rounded-xl shadow-glass-sm">
-                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">
+              {/* 2. Total Saved (with clean member breakdown) */}
+              <div className="glass-card p-3.5 rounded-2xl shadow-glass-sm border border-emerald-100/60 bg-emerald-50/20">
+                <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider block">
                   {isMultiMember ? "Total Saved (Team)" : "Total Saved"}
                 </span>
-                <span className="text-base sm:text-lg font-extrabold text-emerald-600 mt-0.5 block">
+                <span className="text-lg sm:text-xl font-extrabold text-emerald-600 mt-0.5 block">
                   {formatCurrency(challengeDetails.stats?.totalSaved || 0, currencySymbol)}
                 </span>
+                {isMultiMember ? (
+                  <div className="text-[10px] text-ipon-muted mt-1 font-semibold truncate flex items-center gap-1.5">
+                    <span className="text-ipon-primary font-bold">You: {formatCurrency(challengeDetails.myStats?.totalSaved || 0, currencySymbol)}</span>
+                    <span className="text-gray-300">•</span>
+                    <span className="text-purple-600 font-bold">{partnerName}: {formatCurrency(othersTotalSaved, currencySymbol)}</span>
+                  </div>
+                ) : (
+                  <span className="text-[10px] text-ipon-muted mt-1 block">
+                    Target: {formatCurrency(challengeDetails.targetAmount, currencySymbol)}
+                  </span>
+                )}
               </div>
 
-              <div className="glass-card p-3 rounded-xl shadow-glass-sm">
-                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Streak</span>
-                <span className="text-base sm:text-lg font-extrabold text-ipon-text flex items-center gap-1 mt-0.5">
+              {/* 3. Streak */}
+              <div className="glass-card p-3.5 rounded-2xl shadow-glass-sm">
+                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">
+                  Streak
+                </span>
+                <span className="text-lg sm:text-xl font-extrabold text-ipon-text flex items-center gap-1.5 mt-0.5">
                   <span>🔥</span>
-                  <span>{challengeDetails.myStats?.currentStreak ?? challengeDetails.stats?.currentStreak ?? 0}d</span>
+                  <span>{challengeDetails.myStats?.currentStreak ?? challengeDetails.stats?.currentStreak ?? 0} days</span>
+                </span>
+                <span className="text-[10px] text-ipon-muted mt-1 block">
+                  Daily consistency
                 </span>
               </div>
 
-              <div className="col-span-2 sm:col-span-1 glass-card p-3 rounded-xl shadow-glass-sm">
-                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Progress</span>
-                <span className="text-base sm:text-lg font-extrabold text-ipon-text mt-0.5 block">
+              {/* 4. Progress */}
+              <div className="glass-card p-3.5 rounded-2xl shadow-glass-sm">
+                <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">
+                  Goal Progress
+                </span>
+                <span className="text-lg sm:text-xl font-extrabold text-ipon-text mt-0.5 block">
                   {challengeDetails.stats?.goalProgressPercent || 0}%
+                </span>
+                <span className="text-[10px] text-ipon-muted mt-1 block">
+                  of {formatCurrency(challengeDetails.targetAmount, currencySymbol)}
                 </span>
               </div>
             </div>

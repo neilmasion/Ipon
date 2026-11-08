@@ -159,6 +159,12 @@ export default function Navbar({ onOpenAddSavings, currencySymbol = "₱", user:
           <Link
             href="/inbox"
             title="Notification Inbox"
+            onClick={() => {
+              setUnreadEmails(0);
+              try {
+                localStorage.setItem("ipon_inbox_last_read", String(Date.now()));
+              } catch {}
+            }}
             className="relative w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-2xl text-gray-500 hover:text-ipon-primary bg-white hover:bg-pink-50 border border-gray-100 hover:border-pink-100 flex items-center justify-center transition-all shadow-sm"
           >
             <Mail className="w-4.5 h-4.5 sm:w-5 sm:h-5" />

@@ -119,31 +119,19 @@ export default function CalendarView({
             <h2 className="text-base sm:text-xl font-bold text-ipon-text">
               {format(currentMonth, "MMMM yyyy")}
             </h2>
-            {monthExpected > 0 && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/70 backdrop-blur-md border border-white/80 shadow-glass-sm text-ipon-primary">
-                Need: {currencySymbol}{monthExpected.toLocaleString()}
-              </span>
-            )}
           </div>
-          {hasMultipleContributors ? (
-            <div className="flex flex-col gap-0.5 mt-0.5">
-              <p className="text-[11px] sm:text-xs text-ipon-muted flex flex-wrap items-center gap-1.5">
-                <span className="font-semibold text-ipon-primary">You:</span>{" "}
-                <span>{currencySymbol}{monthMySaved.toLocaleString()}</span>
-                <span className="text-ipon-muted/60">•</span>
-                <span className="font-semibold text-purple-600">Partner:</span>{" "}
-                <span>{currencySymbol}{(Math.max(0, monthTotalSaved - monthMySaved)).toLocaleString()}</span>
-                <span className="text-ipon-muted/60">•</span>
-                <span className="font-semibold text-emerald-600">Team Total:</span>{" "}
-                <span>{currencySymbol}{monthTotalSaved.toLocaleString()}</span>
-                <span className="text-ipon-muted/60 font-normal">({currencySymbol}{monthExpected.toLocaleString()} expected)</span>
-              </p>
-            </div>
-          ) : (
-            <p className="text-[11px] sm:text-xs text-ipon-muted mt-0.5">
-              Saved {currencySymbol}{monthTotalSaved.toLocaleString()} of {currencySymbol}{monthExpected.toLocaleString()} expected this month
-            </p>
-          )}
+          <p className="text-[11px] sm:text-xs text-ipon-muted mt-0.5">
+            {monthTotalSaved > 0 ? (
+              <span>
+                Saved <strong className="text-emerald-600 font-bold">{currencySymbol}{monthTotalSaved.toLocaleString()}</strong> this month
+                {hasMultipleContributors && (
+                  <span className="text-ipon-primary font-semibold"> (Your share: {currencySymbol}{monthMySaved.toLocaleString()})</span>
+                )}
+              </span>
+            ) : (
+              <span>Target: {currencySymbol}{monthExpected.toLocaleString()} this month</span>
+            )}
+          </p>
         </div>
 
         <div className="flex items-center flex-wrap gap-2 self-end sm:self-auto">
