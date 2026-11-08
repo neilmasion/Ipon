@@ -56,13 +56,13 @@ export async function POST(req: Request) {
     // Generate secure 6-digit verification code
     const verificationToken = crypto.randomInt(100000, 1000000).toString();
 
-    // Create user with default reminder settings
+    // Create user with unverified status until 6-digit code is confirmed
     const newUser = await prisma.user.create({
       data: {
         name: cleanName,
         email: cleanEmail,
         password: hashedPassword,
-        isVerified: true,
+        isVerified: false,
         verificationToken,
         reminderSettings: {
           create: {

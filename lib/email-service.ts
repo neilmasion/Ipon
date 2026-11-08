@@ -146,6 +146,8 @@ async function sendEmail(
       console.error(`[Ipon Mailer][Gmail SMTP] Failed to send email to ${to}:`, err?.message || err);
       return { success: false, reason: err?.message || "Gmail SMTP send failed" };
     }
+  } else {
+    console.warn("[Ipon Mailer] GMAIL_USER or GMAIL_APP_PASSWORD is not configured in environment variables.");
   }
 
   // 2. Try Mailgun fallback if configured
