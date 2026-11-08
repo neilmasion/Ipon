@@ -18,6 +18,8 @@ model User {
   resetTokenExpiry    DateTime?
   currency            String             @default("PHP")
   currencySymbol      String             @default("₱")
+  avatarUrl           String?
+  avatarUpdatedAt     DateTime?
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
@@ -47,6 +49,9 @@ model IponChallenge {
 
   members         ChallengeMember[]
   savingsRecords  SavingsRecord[]
+
+  @@index([userId, status])
+  @@index([startDate])
 }
 
 model ChallengeMember {
@@ -59,6 +64,7 @@ model ChallengeMember {
   joinedAt    DateTime       @default(now())
 
   @@unique([challengeId, userId])
+  @@index([userId])
 }
 
 model Goal {
@@ -76,6 +82,8 @@ model Goal {
 
   challenges      IponChallenge[]
   savingsRecords  SavingsRecord[]
+
+  @@index([userId, status])
 }
 
 model SavingsRecord {
@@ -95,6 +103,9 @@ model SavingsRecord {
   updatedAt       DateTime        @updatedAt
 
   @@unique([userId, challengeId, date])
+  @@index([userId, date])
+  @@index([challengeId, date])
+  @@index([goalId])
 }
 
 model ReminderSetting {

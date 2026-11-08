@@ -88,25 +88,25 @@ export default function AddSavingsModal({
     if (numericAmount >= dailyGoal) {
       const excess = numericAmount - dailyGoal;
       if (excess > 0) {
-        statusText = `${formatCurrency(numericAmount, currencySymbol)} / ${formatCurrency(dailyGoal, currencySymbol)} • 🔥 ${formatCurrency(excess, currencySymbol)} above goal!`;
-        statusColor = "text-ipon-primary font-semibold";
+        statusText = `Goal reached! (+${formatCurrency(excess, currencySymbol)} extra)`;
+        statusColor = "text-emerald-600 font-semibold";
       } else {
-        statusText = `${formatCurrency(numericAmount, currencySymbol)} / ${formatCurrency(dailyGoal, currencySymbol)} • ✅ Goal reached`;
+        statusText = `Daily goal reached!`;
         statusColor = "text-emerald-600 font-semibold";
       }
     } else {
       const remaining = dailyGoal - numericAmount;
-      statusText = `${formatCurrency(numericAmount, currencySymbol)} / ${formatCurrency(dailyGoal, currencySymbol)} • ${formatCurrency(remaining, currencySymbol)} remaining`;
+      statusText = `${formatCurrency(remaining, currencySymbol)} to reach daily goal`;
       statusColor = "text-amber-600 font-medium";
     }
   }
 
   const quickPicks = [
-    { label: "Goal", value: dailyGoal },
-    { label: "+₱20", value: 20 },
-    { label: "+₱50", value: 50 },
-    { label: "+₱100", value: 100 },
-    { label: "+₱500", value: 500 },
+    { label: `${currencySymbol}${dailyGoal} (Goal)`, value: dailyGoal },
+    { label: `${currencySymbol}20`, value: 20 },
+    { label: `${currencySymbol}50`, value: 50 },
+    { label: `${currencySymbol}100`, value: 100 },
+    { label: `${currencySymbol}500`, value: 500 },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -168,10 +168,7 @@ export default function AddSavingsModal({
             <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm">
               <Sparkles className="w-3.5 h-3.5 stroke-[2.2]" />
             </div>
-            <div>
-              <h3 className="font-bold text-base text-ipon-text">Record Savings</h3>
-              <p className="text-[11px] text-ipon-muted">Log your actual daily saved money</p>
-            </div>
+            <h3 className="font-bold text-base text-ipon-text">Record Savings</h3>
           </div>
           <button
             onClick={onClose}
@@ -211,19 +208,10 @@ export default function AddSavingsModal({
 
           {/* Date Picker */}
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-[11px] font-bold text-ipon-text flex items-center gap-1.5">
-                <CalendarIcon className="w-3 h-3 text-ipon-primary" />
-                <span>Date</span>
-              </label>
-              {totalNeededToDate > 0 && (
-                <span className="text-[10px] text-ipon-primary font-semibold flex items-center gap-1 bg-white/70 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/80 shadow-glass-sm">
-                  <span>Target by this date:</span>
-                  <strong>{formatCurrency(totalNeededToDate, currencySymbol)}</strong>
-                  <span className="text-ipon-muted text-[9px]">({elapsedDaysToDate}d)</span>
-                </span>
-              )}
-            </div>
+            <label className="block text-[11px] font-bold text-ipon-text mb-1 flex items-center gap-1.5">
+              <CalendarIcon className="w-3 h-3 text-ipon-primary" />
+              <span>Date</span>
+            </label>
             <input
               type="date"
               value={date}
@@ -253,7 +241,7 @@ export default function AddSavingsModal({
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-[11px] font-bold text-ipon-text">
-                Actual Saved
+                Amount
               </label>
               <span className="text-[11px] text-ipon-muted">
                 Daily Goal: <strong className="text-ipon-text">{formatCurrency(dailyGoal, currencySymbol)}</strong>
@@ -283,16 +271,16 @@ export default function AddSavingsModal({
                   key={i}
                   type="button"
                   onClick={() => setAmountStr(String(pick.value))}
-                  className="px-2 py-0.5 rounded-lg glass-pill hover:bg-white text-ipon-primary text-[11px] font-bold transition-all"
+                  className="px-2.5 py-1 rounded-lg glass-pill hover:bg-white text-ipon-primary text-[11px] font-bold transition-all border border-pink-100"
                 >
-                  {pick.label === "Goal" ? `Exact Goal (${currencySymbol}${pick.value})` : pick.label}
+                  {pick.label}
                 </button>
               ))}
             </div>
 
             {/* Dynamic Goal Feedback */}
             {statusText && (
-              <div className="mt-2 p-2 rounded-lg bg-ipon-light/60 text-[11px] border border-ipon-primary/10">
+              <div className="mt-2 p-2 rounded-lg bg-ipon-light/60 text-xs border border-ipon-primary/10">
                 <span className={statusColor}>{statusText}</span>
               </div>
             )}
@@ -305,7 +293,7 @@ export default function AddSavingsModal({
             </label>
             <input
               type="text"
-              placeholder="e.g., Skipped milk tea, spare coins"
+              placeholder="e.g. coffee, spare change, tip"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="w-full px-3 py-2 rounded-xl glass-input text-xs text-ipon-text"

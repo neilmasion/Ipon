@@ -50,6 +50,8 @@ export async function getCurrentUser() {
         isVerified: true,
         currency: true,
         currencySymbol: true,
+        avatarUrl: true,
+        avatarUpdatedAt: true,
         createdAt: true,
         reminderSettings: true,
       },

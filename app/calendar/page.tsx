@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import BottomNav from "@/components/BottomNav";
-import LoadingScreen from "@/components/LoadingScreen";
+import { CalendarSkeleton } from "@/components/skeletons/PageSkeletons";
 import CalendarView from "@/components/CalendarView";
 import AddSavingsModal from "@/components/AddSavingsModal";
 import CreateChallengeModal from "@/components/CreateChallengeModal";
@@ -104,13 +104,7 @@ export default function CalendarPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-        <Navbar currencySymbol={currencySymbol} user={user} />
-        <LoadingScreen message="Loading calendar tracker..." subMessage="Synchronizing your savings checkmarks" />
-        <BottomNav />
-      </div>
-    );
+    return <CalendarSkeleton currencySymbol={currencySymbol} />;
   }
 
   return (
@@ -121,12 +115,8 @@ export default function CalendarPage() {
         {/* Page Title & Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-1.5 text-ipon-primary text-[11px] font-bold uppercase tracking-wider">
-              <CalendarIcon className="w-3.5 h-3.5" />
-              <span>Savings Calendar</span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-ipon-text mt-0.5">
-              Daily Tracking
+            <h1 className="text-xl sm:text-2xl font-extrabold text-ipon-text">
+              Calendar
             </h1>
           </div>
 
@@ -203,51 +193,36 @@ export default function CalendarPage() {
 
         {/* Challenge Stats Summary Bar */}
         {challengeDetails && (
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-            <div className="glass-card glass-card-hover p-3 rounded-xl shadow-glass-sm">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5">
+            <div className="glass-card p-3 rounded-xl shadow-glass-sm">
               <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Daily Target</span>
-              <span className="text-base sm:text-lg font-extrabold text-ipon-text">
+              <span className="text-base sm:text-lg font-extrabold text-ipon-text mt-0.5 block">
                 {formatCurrency(challengeDetails.dailyGoal, currencySymbol)}
               </span>
-              <span className="text-[9px] text-ipon-muted block mt-0.5">Per day</span>
             </div>
-            <div className="glass-card glass-card-hover p-3 rounded-xl shadow-glass-sm">
-              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Expected to Date</span>
-              <span className="text-base sm:text-lg font-extrabold text-ipon-text">
+            <div className="glass-card p-3 rounded-xl shadow-glass-sm">
+              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Expected</span>
+              <span className="text-base sm:text-lg font-extrabold text-ipon-text mt-0.5 block">
                 {formatCurrency(challengeDetails.stats?.expectedSavings || 0, currencySymbol)}
               </span>
-              <span className="text-[9px] text-ipon-muted block mt-0.5">
-                {challengeDetails.stats?.elapsedDays || 0}d target
-              </span>
             </div>
-            <div className="glass-card glass-card-hover p-3 rounded-xl shadow-glass-sm">
+            <div className="glass-card p-3 rounded-xl shadow-glass-sm">
               <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Total Saved</span>
-              <span className="text-base sm:text-lg font-extrabold text-ipon-primary">
+              <span className="text-base sm:text-lg font-extrabold text-ipon-primary mt-0.5 block">
                 {formatCurrency(challengeDetails.stats?.totalSaved || 0, currencySymbol)}
               </span>
-              <span className="text-[9px] block mt-0.5 font-semibold">
-                {(challengeDetails.stats?.aheadBehind || 0) >= 0 ? (
-                  <span className="text-emerald-600">+{formatCurrency(challengeDetails.stats?.aheadBehind || 0, currencySymbol)}</span>
-                ) : (
-                  <span className="text-amber-600">-{formatCurrency(Math.abs(challengeDetails.stats?.aheadBehind || 0), currencySymbol)}</span>
-                )}
-              </span>
             </div>
-            <div className="glass-card glass-card-hover p-3 rounded-xl shadow-glass-sm">
-              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Current Streak</span>
-              <span className="text-base sm:text-lg font-extrabold text-ipon-text flex items-center gap-1">
+            <div className="glass-card p-3 rounded-xl shadow-glass-sm">
+              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Streak</span>
+              <span className="text-base sm:text-lg font-extrabold text-ipon-text flex items-center gap-1 mt-0.5">
                 <span>🔥</span>
                 <span>{challengeDetails.stats?.currentStreak || 0}d</span>
               </span>
-              <span className="text-[9px] text-ipon-muted block mt-0.5">Streak count</span>
             </div>
-            <div className="col-span-2 sm:col-span-1 glass-card glass-card-hover p-3 rounded-xl shadow-glass-sm">
-              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Target Progress</span>
-              <span className="text-base sm:text-lg font-extrabold text-ipon-text">
+            <div className="col-span-2 md:col-span-1 glass-card p-3 rounded-xl shadow-glass-sm">
+              <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Progress</span>
+              <span className="text-base sm:text-lg font-extrabold text-ipon-text mt-0.5 block">
                 {challengeDetails.stats?.goalProgressPercent || 0}%
-              </span>
-              <span className="text-[9px] text-ipon-muted block mt-0.5 truncate">
-                of {formatCurrency(challengeDetails.targetAmount, currencySymbol)}
               </span>
             </div>
           </div>

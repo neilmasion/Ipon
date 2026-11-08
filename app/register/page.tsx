@@ -91,13 +91,20 @@ export default function RegisterPage() {
       }
 
       setSuccessInfo(
-        "Account created! We've sent a 6-digit verification code to your email. Redirecting to verification..."
+        "Account created! Welcome to Ipon. Taking you to your dashboard..."
       );
 
+      // Flag this new user to show the onboarding tutorial once
+      try {
+        if (data?.user?.id) {
+          localStorage.setItem(`ipon_new_account_${data.user.id}`, "true");
+        }
+      } catch {}
+
       setTimeout(() => {
-        router.push(`/verify?email=${encodeURIComponent(email)}`);
+        router.push("/");
         router.refresh();
-      }, 1200);
+      }, 1000);
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {

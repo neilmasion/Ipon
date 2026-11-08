@@ -110,10 +110,7 @@ export default function CreateChallengeModal({
             <div className="w-8 h-8 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm">
               <Sparkles className="w-3.5 h-3.5 stroke-[2.2]" />
             </div>
-            <div>
-              <h3 className="font-bold text-base text-ipon-text">Create Ipon Challenge</h3>
-              <p className="text-[11px] text-ipon-muted">Set your daily target and start date</p>
-            </div>
+            <h3 className="font-bold text-base text-ipon-text">New Challenge</h3>
           </div>
           <button
             onClick={onClose}
@@ -138,7 +135,7 @@ export default function CreateChallengeModal({
             </label>
             <input
               type="text"
-              placeholder="e.g., New Phone, ₱50 Daily Habit"
+              placeholder="e.g. New Phone, Emergency Fund"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 rounded-xl glass-input text-xs font-semibold"
@@ -209,7 +206,7 @@ export default function CreateChallengeModal({
 
             <div>
               <label className="block text-[11px] font-bold text-ipon-text mb-1">
-                Expiring / End Date
+                End Date (Optional)
               </label>
               <input
                 type="date"
@@ -220,52 +217,22 @@ export default function CreateChallengeModal({
             </div>
           </div>
 
-          {/* Dynamic Expiring Date Calculation Banner */}
+          {/* Estimated completion */}
           {expiringInfo && (
-            <div className="p-3 rounded-xl bg-white/70 backdrop-blur-md border border-white/90 shadow-glass-sm space-y-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1 text-[11px] font-bold text-ipon-primary">
-                  <Clock className="w-3 h-3" />
-                  <span>Calculated Expiring Date</span>
-                </div>
-                {endDate !== expiringInfo.dateStr && (
-                  <button
-                    type="button"
-                    onClick={() => setEndDate(expiringInfo.dateStr)}
-                    className="text-[9px] font-bold text-ipon-primary hover:underline flex items-center gap-0.5 bg-white px-1.5 py-0.5 rounded border border-ipon-primary/20 shadow-xs"
-                  >
-                    <span>Auto-apply</span>
-                  </button>
-                )}
-              </div>
-              <div className="text-xs sm:text-sm font-extrabold text-ipon-text">
-                {expiringInfo.formattedDate}
-              </div>
-              <p className="text-[10px] text-ipon-muted leading-tight">
-                At <strong className="text-ipon-text">{currencySymbol}{numericDaily}/day</strong>, you will reach <strong className="text-ipon-text">{currencySymbol}{numericTarget.toLocaleString()}</strong> in <strong className="text-ipon-primary">{expiringInfo.daysNeeded.toLocaleString()} days</strong> ({expiringInfo.years >= 1 ? `~${expiringInfo.years} years` : `~${expiringInfo.months} months`}).
+            <div className="p-2.5 rounded-xl bg-white/70 backdrop-blur-md border border-white/90 shadow-glass-sm">
+              <p className="text-xs text-ipon-muted">
+                Estimated finish: <strong className="text-ipon-text">{expiringInfo.formattedDate}</strong>
+                <span className="text-ipon-primary"> ({expiringInfo.daysNeeded.toLocaleString()} days)</span>
               </p>
             </div>
           )}
 
-          {/* Backdate notification badge */}
-          <div className="p-2.5 rounded-xl bg-ipon-light/60 border border-ipon-primary/10 flex items-start gap-1.5 text-[10px] text-ipon-text leading-relaxed">
-            <Info className="w-3 h-3 text-ipon-primary shrink-0 mt-0.5" />
-            <span>
-              <strong>Backdated Friendly:</strong> You can pick a past start date. Past dates simply await your manual logs.
-            </span>
-          </div>
-
           {/* Collaborative / Shared Challenge Option */}
           <div className="p-3 rounded-xl border border-white/70 bg-white/50 backdrop-blur-md">
             <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <span className="text-xs font-bold text-ipon-text block">
-                  Collaborative Challenge
-                </span>
-                <span className="text-[10px] text-ipon-muted">
-                  Generate an invite code so partners or friends can contribute together
-                </span>
-              </div>
+              <span className="text-xs font-bold text-ipon-text">
+                Invite friends to save together
+              </span>
               <input
                 type="checkbox"
                 checked={isShared}

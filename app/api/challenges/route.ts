@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { calculateChallengeStats, getTodayDateStr } from "@/lib/savings-calculations";
 import { sanitizeText, sanitizeDate, sanitizeAmount, safeErrorResponse } from "@/lib/security";
+import { serverCache, getApiCacheHeaders } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -13,119 +14,124 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const challenges = await prisma.iponChallenge.findMany({
-      where: {
-        OR: [
-          { userId: user.id },
-          { members: { some: { userId: user.id } } },
-        ],
-      },
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-        connectedGoal: true,
-        members: {
+    const cacheKey = `user:${user.id}:challenges`;
+
+    const enriched = await serverCache.getOrSet(
+      cacheKey,
+      async () => {
+        const challenges = await prisma.iponChallenge.findMany({
+          where: {
+            OR: [
+              { userId: user.id },
+              { members: { some: { userId: user.id } } },
+            ],
+          },
           include: {
             user: { select: { id: true, name: true, email: true } },
+            connectedGoal: true,
+            members: {
+              include: {
+                user: { select: { id: true, name: true, email: true } },
+              },
+            },
+            savingsRecords: {
+              include: {
+                user: { select: { id: true, name: true } },
+              },
+              orderBy: { date: "asc" },
+            },
           },
-        },
-        savingsRecords: {
-          include: {
-            user: { select: { id: true, name: true } },
-          },
-          orderBy: { date: "asc" },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+          orderBy: { createdAt: "desc" },
+        });
 
-    const todayStr = getTodayDateStr();
+        const todayStr = getTodayDateStr();
 
-    // Attach calculations and contributor breakdown to each challenge
-    const enriched = challenges.map((c) => {
-      // Sum up savings across all members for challenge-level stats
-      // Or map unique date records (summing member amounts per date)
-      const dateMap = new Map<string, { date: string; dailyGoal: number; amountSaved: number }>();
-      c.savingsRecords.forEach((r) => {
-        const existing = dateMap.get(r.date);
-        if (existing) {
-          existing.amountSaved += r.amountSaved;
-        } else {
-          dateMap.set(r.date, {
-            date: r.date,
-            dailyGoal: r.dailyGoal,
-            amountSaved: r.amountSaved,
+        return challenges.map((c) => {
+          const dateMap = new Map<string, { date: string; dailyGoal: number; amountSaved: number }>();
+          c.savingsRecords.forEach((r) => {
+            const existing = dateMap.get(r.date);
+            if (existing) {
+              existing.amountSaved += r.amountSaved;
+            } else {
+              dateMap.set(r.date, {
+                date: r.date,
+                dailyGoal: r.dailyGoal,
+                amountSaved: r.amountSaved,
+              });
+            }
           });
-        }
-      });
 
-      const pooledRecords = Array.from(dateMap.values());
+          const pooledRecords = Array.from(dateMap.values());
 
-      const stats = calculateChallengeStats({
-        startDate: c.startDate,
-        endDate: c.endDate,
-        dailyGoal: c.dailyGoal,
-        targetAmount: c.targetAmount,
-        records: pooledRecords,
-        todayDateStr: todayStr,
-      });
+          const stats = calculateChallengeStats({
+            startDate: c.startDate,
+            endDate: c.endDate,
+            dailyGoal: c.dailyGoal,
+            targetAmount: c.targetAmount,
+            records: pooledRecords,
+            todayDateStr: todayStr,
+          });
 
-      // Contributor breakdown
-      const contributorMap = new Map<string, {
-        userId: string;
-        name: string;
-        email: string;
-        totalSaved: number;
-        savingDays: number;
-        isOwner: boolean;
-      }>();
+          // Contributor breakdown
+          const contributorMap = new Map<string, {
+            userId: string;
+            name: string;
+            email: string;
+            totalSaved: number;
+            savingDays: number;
+            isOwner: boolean;
+          }>();
 
-      // Ensure challenge owner is in contributorMap
-      contributorMap.set(c.userId, {
-        userId: c.userId,
-        name: c.user?.name || "Owner",
-        email: c.user?.email || "",
-        totalSaved: 0,
-        savingDays: 0,
-        isOwner: true,
-      });
-
-      // Ensure all joined members are in contributorMap
-      c.members?.forEach((m) => {
-        if (!contributorMap.has(m.userId)) {
-          contributorMap.set(m.userId, {
-            userId: m.userId,
-            name: m.user?.name || "Member",
-            email: m.user?.email || "",
+          // Ensure challenge owner is in contributorMap
+          contributorMap.set(c.userId, {
+            userId: c.userId,
+            name: c.user?.name || "Owner",
+            email: c.user?.email || "",
             totalSaved: 0,
             savingDays: 0,
-            isOwner: m.userId === c.userId,
+            isOwner: true,
           });
-        }
-      });
 
-      // Sum each contributor's savings
-      c.savingsRecords.forEach((r) => {
-        const contrib = contributorMap.get(r.userId);
-        if (contrib && r.amountSaved > 0) {
-          contrib.totalSaved += r.amountSaved;
-          contrib.savingDays++;
-        }
-      });
+          // Ensure all joined members are in contributorMap
+          c.members?.forEach((m) => {
+            if (!contributorMap.has(m.userId)) {
+              contributorMap.set(m.userId, {
+                userId: m.userId,
+                name: m.user?.name || "Member",
+                email: m.user?.email || "",
+                totalSaved: 0,
+                savingDays: 0,
+                isOwner: m.userId === c.userId,
+              });
+            }
+          });
 
-      const contributors = Array.from(contributorMap.values()).map((contrib) => ({
-        ...contrib,
-        percentOfTotal: stats.totalSaved > 0 ? Math.round((contrib.totalSaved / stats.totalSaved) * 100) : 0,
-      }));
+          // Sum each contributor's savings
+          c.savingsRecords.forEach((r) => {
+            const contrib = contributorMap.get(r.userId);
+            if (contrib && r.amountSaved > 0) {
+              contrib.totalSaved += r.amountSaved;
+              contrib.savingDays++;
+            }
+          });
 
-      return {
-        ...c,
-        stats,
-        contributors,
-        isUserOwner: c.userId === user.id,
-      };
-    });
+          const contributors = Array.from(contributorMap.values()).map((contrib) => ({
+            ...contrib,
+            percentOfTotal: stats.totalSaved > 0 ? Math.round((contrib.totalSaved / stats.totalSaved) * 100) : 0,
+          }));
 
-    return NextResponse.json({ challenges: enriched });
+          return {
+            ...c,
+            stats,
+            contributors,
+            isUserOwner: c.userId === user.id,
+          };
+        });
+      },
+      20_000 // 20s TTL
+    );
+
+    return NextResponse.json({ challenges: enriched }, { headers: getApiCacheHeaders(10, 60) });
   } catch (error) {
     console.error("Fetch challenges error:", error);
     return NextResponse.json({ error: "Failed to fetch challenges" }, { status: 500 });
@@ -204,6 +210,9 @@ export async function POST(req: Request) {
         },
       },
     });
+
+    // Invalidate cached challenges and stats for the user
+    serverCache.invalidateUser(user.id);
 
     return NextResponse.json({ challenge: newChallenge }, { status: 201 });
   } catch (error) {

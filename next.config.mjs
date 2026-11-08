@@ -7,10 +7,50 @@ if (process.env.NODE_ENV) {
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false, // Security: Hide 'X-Powered-By: Next.js' header
+  compress: true, // Item 15: Enable gzip/brotli payload compression
+  swcMinify: true, // Item 6: Fast SWC code & CSS minification
+  devIndicators: {
+    buildActivity: false,
+  },
   
-  // Security Headers (#16 HTTPS, #17 Security Headers, #8 XSS Protection)
+  // Item 1: Modern WebP / AVIF image compression
+  images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days cache for static images
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.r2.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "**.cloudflarestorage.com",
+      },
+    ],
+  },
+
+  // Item 3: Tree-shaking & code splitting for heavy icon and date utility chunks
+  experimental: {
+    optimizePackageImports: ["lucide-react", "date-fns"],
+  },
+
+  // Item 6: Strip console logs in production bundles for smaller, faster JS
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
+  },
+  
+  // Item 4 & 5: CDN & Browser Caching Headers (#16 HTTPS, #17 Security Headers, #8 XSS Protection)
   async headers() {
     return [
+      {
+        source: "/_next/static/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
       {
         source: "/(.*)",
         headers: [
@@ -46,7 +86,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://vitals.vercel-insights.com",
+              "connect-src 'self' ws: wss: https://vitals.vercel-insights.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

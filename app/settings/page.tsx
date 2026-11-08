@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import BottomNav from "@/components/BottomNav";
-import LoadingScreen from "@/components/LoadingScreen";
+import { SettingsSkeleton } from "@/components/skeletons/PageSkeletons";
 import { useRouter } from "next/navigation";
 import { 
   Settings as SettingsIcon, 
@@ -17,7 +17,11 @@ import {
   DollarSign, 
   ShieldCheck, 
   Mail,
-  Send
+  Send,
+  Sparkles,
+  Camera,
+  Clock,
+  Loader2
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -40,8 +44,78 @@ export default function SettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  // 3-day cooldown check for profile image changes
+  const COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
+  const getCooldownStatus = () => {
+    if (!user?.avatarUpdatedAt) return null;
+    const lastUpdated = new Date(user.avatarUpdatedAt).getTime();
+    const elapsed = Date.now() - lastUpdated;
+    if (elapsed >= COOLDOWN_MS) return null;
+
+    const remainingMs = COOLDOWN_MS - elapsed;
+    const hours = Math.ceil(remainingMs / (1000 * 60 * 60));
+    const days = Math.ceil(hours / 24);
+    return {
+      isActive: true,
+      text: days > 1 ? `${days} days` : `${hours} hour(s)`,
+    };
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setStatusMessage("");
+    setErrorMessage("");
+
+    const cooldown = getCooldownStatus();
+    if (cooldown?.isActive) {
+      setErrorMessage(`Profile photo change is on cooldown. Available again in ${cooldown.text}.`);
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage("File too large. Maximum size is 5MB.");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const res = await fetch("/api/profile/avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to upload photo");
+      }
+
+      const updatedUser = {
+        ...user,
+        avatarUrl: data.avatarUrl,
+        avatarUpdatedAt: data.avatarUpdatedAt,
+      };
+      setUser(updatedUser);
+      try {
+        sessionStorage.setItem("ipon_user", JSON.stringify(updatedUser));
+      } catch {}
+
+      setStatusMessage("Profile picture updated successfully!");
+    } catch (err: any) {
+      setErrorMessage(err.message || "Failed to upload photo");
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = "";
+    }
+  };
 
   useEffect(() => {
     async function loadSettings() {
@@ -161,13 +235,7 @@ export default function SettingsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-        <Navbar currencySymbol={currencySymbol} user={user} />
-        <LoadingScreen message="Loading settings..." subMessage="Fetching preferences and notification rules" />
-        <BottomNav />
-      </div>
-    );
+    return <SettingsSkeleton currencySymbol={currencySymbol} />;
   }
 
   return (
@@ -212,7 +280,65 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3.5">
+              {/* Profile Avatar Upload */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 pb-3 border-b border-white/60">
+                <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-tr from-ipon-primary to-pink-400 text-white flex items-center justify-center text-xl font-bold shrink-0 shadow-md overflow-hidden border-2 border-white">
+                  {user?.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.name || "Profile"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span>{(user?.name?.[0] || user?.email?.[0] || "U").toUpperCase()}</span>
+                  )}
+                  {uploadingAvatar && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-xs">
+                      <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-sm ${
+                        getCooldownStatus()?.isActive || uploadingAvatar
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                          : "pink-gradient-btn cursor-pointer"
+                      }`}
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>{uploadingAvatar ? "Uploading..." : user?.avatarUrl ? "Change Photo" : "Upload Photo"}</span>
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp, image/gif"
+                        disabled={Boolean(getCooldownStatus()?.isActive) || uploadingAvatar}
+                        onChange={handleAvatarUpload}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {getCooldownStatus()?.isActive ? (
+                      <span className="text-[11px] font-semibold text-amber-700 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-xl flex items-center gap-1 backdrop-blur-sm">
+                        <Clock className="w-3 h-3 shrink-0" />
+                        <span>Cooldown: Can change in {getCooldownStatus()?.text}</span>
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-ipon-muted font-medium">
+                        PNG, JPG or WebP (max 5MB) • 3-day cooldown
+                      </span>
+                    )}
+                  </div>
+                  {getCooldownStatus()?.isActive && (
+                    <p className="text-[10px] text-ipon-muted">
+                      To prevent spam, profile pictures can only be changed once every 3 days.
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-[11px] font-semibold text-ipon-text mb-1">Name</label>
                 <input
@@ -396,6 +522,35 @@ export default function SettingsPage() {
                   className="w-full px-3 py-2 rounded-xl glass-input text-xs font-semibold text-ipon-text"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* App Walkthrough */}
+          <div className="glass-card rounded-2xl p-4 sm:p-5 shadow-glass">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-white/70 border border-white/80 shadow-sm flex items-center justify-center text-ipon-primary backdrop-blur-md">
+                  <Sparkles className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div>
+                  <h2 className="text-xs sm:text-sm font-bold text-ipon-text">App Walkthrough</h2>
+                  <p className="text-[11px] text-ipon-muted">Need a refresher on how Ipon works?</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (user?.id) {
+                    localStorage.removeItem(`ipon_tutorial_seen_${user.id}`);
+                    localStorage.setItem(`ipon_new_account_${user.id}`, "true");
+                    window.location.href = "/";
+                  }
+                }}
+                className="glass-pill px-3 py-1.5 rounded-xl text-xs font-bold text-ipon-primary hover:bg-pink-50 transition-all border border-pink-200/60"
+              >
+                Replay Tutorial
+              </button>
             </div>
           </div>
 

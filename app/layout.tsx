@@ -1,7 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import CookieConsent from "@/components/CookieConsent";
 import { Analytics } from "@vercel/analytics/next";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-plus-jakarta-sans",
+});
 
 export const metadata: Metadata = {
   title: "Ipon — Minimalist Daily Savings Tracker",
@@ -21,16 +29,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="min-h-screen bg-[#FFF5F8] text-ipon-text antialiased selection:bg-ipon-light selection:text-ipon-primary relative overflow-x-hidden">
+    <html lang="en" className={plusJakartaSans.variable}>
+      <head />
+      <body className={`${plusJakartaSans.className} min-h-screen bg-[#FFF5F8] text-ipon-text antialiased selection:bg-ipon-light selection:text-ipon-primary relative overflow-x-hidden`}>
         {/* Ambient Glassmorphic Background Orbs */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
           {/* Top Left Rose Orb */}

@@ -9,14 +9,9 @@ export default function PrivacyPolicyPage() {
       <div className="max-w-3xl mx-auto">
         {/* Header / Brand */}
         <div className="flex items-center justify-between mb-8 pb-6 border-b border-ipon-border/80">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-2xl bg-ipon-light flex items-center justify-center text-ipon-primary border border-ipon-primary/10 group-hover:scale-105 transition-transform">
-              <PiggyBank className="w-5 h-5 text-ipon-primary stroke-[2.2]" />
-            </div>
-            <div>
-              <span className="font-extrabold text-xl tracking-tight text-ipon-text">Ipon</span>
-              <span className="inline-block w-2 h-2 rounded-full bg-ipon-primary ml-1"></span>
-            </div>
+          <Link href="/" className="flex items-center gap-1.5 group">
+            <span className="font-extrabold text-2xl tracking-tight text-ipon-text group-hover:text-ipon-primary transition-colors">Ipon</span>
+            <span className="inline-block w-2 h-2 rounded-full bg-ipon-primary animate-pulse"></span>
           </Link>
 
           <Link

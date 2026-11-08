@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import BottomNav from "@/components/BottomNav";
-import LoadingScreen from "@/components/LoadingScreen";
-import AddSavingsModal from "@/components/AddSavingsModal";
+import { HistorySkeleton } from "@/components/skeletons/PageSkeletons";
+
+// Items 2 & 3: Code splitting modal
+const AddSavingsModal = dynamic(() => import("@/components/AddSavingsModal"), { ssr: false });
+
 import { formatCurrency, getTodayDateStr } from "@/lib/savings-calculations";
 import { useRouter } from "next/navigation";
 import { 
@@ -28,6 +32,7 @@ export default function HistoryPage() {
   const [activeFilter, setActiveFilter] = useState<"all" | "month" | "year" | "challenge">("all");
   const [selectedChallengeFilter, setSelectedChallengeFilter] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState<number>(25);
 
   // Edit record modal
   const [editingRecord, setEditingRecord] = useState<any>(null);
@@ -126,13 +131,7 @@ export default function HistoryPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-        <Navbar currencySymbol={currencySymbol} user={user} />
-        <LoadingScreen message="Loading savings history..." subMessage="Retrieving your past contributions" />
-        <BottomNav />
-      </div>
-    );
+    return <HistorySkeleton currencySymbol={currencySymbol} />;
   }
 
   return (
@@ -143,12 +142,8 @@ export default function HistoryPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <div className="flex items-center gap-2 text-ipon-primary text-xs font-bold uppercase tracking-wider">
-              <HistoryIcon className="w-3.5 h-3.5" />
-              <span>Activity Log</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-ipon-text mt-0.5">
-              Savings History
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-ipon-text">
+              History
             </h1>
           </div>
 
@@ -170,34 +165,27 @@ export default function HistoryPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 mb-5">
               <div className="glass-card p-3 sm:p-3.5 rounded-2xl shadow-glass-sm">
                 <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Total Logged</span>
-                <span className="text-base sm:text-xl font-extrabold text-ipon-primary">
+                <span className="text-base sm:text-xl font-extrabold text-ipon-primary mt-0.5 block">
                   {formatCurrency(totalSavedFiltered, currencySymbol)}
                 </span>
-                <span className="text-[9px] text-ipon-muted block mt-0.5">{records.length} records in view</span>
               </div>
               {activeChal && (
                 <div className="glass-card p-3 sm:p-3.5 rounded-2xl shadow-glass-sm">
                   <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Target by Today</span>
-                  <span className="text-base sm:text-xl font-extrabold text-ipon-text">
+                  <span className="text-base sm:text-xl font-extrabold text-ipon-text mt-0.5 block">
                     {formatCurrency(activeChal.stats?.expectedSavings || 0, currencySymbol)}
-                  </span>
-                  <span className="text-[9px] text-ipon-muted block mt-0.5 truncate">
-                    {activeChal.stats?.elapsedDays || 0}d ({activeChal.name})
                   </span>
                 </div>
               )}
               {activeChal && (
                 <div className="col-span-2 sm:col-span-1 glass-card p-3 sm:p-3.5 rounded-2xl shadow-glass-sm">
                   <span className="text-[10px] text-ipon-muted font-bold uppercase tracking-wider block">Pace Status</span>
-                  <span className="text-base sm:text-xl font-extrabold">
+                  <span className="text-base sm:text-xl font-extrabold mt-0.5 block">
                     {(activeChal.stats?.aheadBehind || 0) >= 0 ? (
                       <span className="text-emerald-600">+{formatCurrency(activeChal.stats?.aheadBehind || 0, currencySymbol)} ahead</span>
                     ) : (
                       <span className="text-amber-600">-{formatCurrency(Math.abs(activeChal.stats?.aheadBehind || 0), currencySymbol)} behind</span>
                     )}
-                  </span>
-                  <span className="text-[9px] text-ipon-muted block mt-0.5">
-                    Daily target: {formatCurrency(activeChal.dailyGoal, currencySymbol)}
                   </span>
                 </div>
               )}
@@ -282,7 +270,7 @@ export default function HistoryPage() {
         )}
 
         <div className="space-y-2.5">
-          {records.map((rec) => {
+          {records.slice(0, visibleCount).map((rec) => {
             const isMissed = rec.amountSaved === 0;
             return (
               <div
@@ -355,6 +343,18 @@ export default function HistoryPage() {
             );
           })}
         </div>
+
+        {/* Item 10: Pagination for large records list */}
+        {records.length > visibleCount && (
+          <div className="mt-5 text-center">
+            <button
+              onClick={() => setVisibleCount((prev) => prev + 25)}
+              className="glass-pill px-6 py-2.5 rounded-2xl text-xs font-bold text-ipon-primary hover:bg-pink-50 transition-all border border-pink-200/60 shadow-glass-sm"
+            >
+              Load More ({records.length - visibleCount} more records)
+            </button>
+          </div>
+        )}
       </main>
 
       {/* Edit Record Modal */}

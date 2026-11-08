@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, signToken } from "@/lib/auth";
-import { sendVerificationEmail } from "@/lib/email-service";
+import { sendVerificationEmail, sendWelcomeGreetingEmail } from "@/lib/email-service";
 import { sanitizeText, sanitizeEmail, toSafeUser, getSecureCookieOptions, safeErrorResponse } from "@/lib/security";
 import crypto from "crypto";
 
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
         name: cleanName,
         email: cleanEmail,
         password: hashedPassword,
-        isVerified: false,
+        isVerified: true,
         verificationToken,
         reminderSettings: {
           create: {
@@ -85,6 +85,9 @@ export async function POST(req: Request) {
 
     // Send verification email (token is only sent in the email, never leaked in API response)
     await sendVerificationEmail(newUser.email, verificationToken, newUser.name);
+
+    // Send welcome greeting notification
+    await sendWelcomeGreetingEmail(newUser.email, newUser.name);
 
     // Sign JWT and set secure cookie
     const token = signToken({ userId: newUser.id, email: newUser.email });

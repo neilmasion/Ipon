@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import BottomNav from "@/components/BottomNav";
+import { InboxSkeleton } from "@/components/skeletons/PageSkeletons";
 import { Mail, Trash2, ExternalLink, RefreshCw, Send, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
@@ -17,7 +18,16 @@ export default function InboxPage() {
       const res = await fetch("/api/email-preview");
       if (res.ok) {
         const data = await res.json();
-        setEmails(data.emails || []);
+        const fetched = data.emails || [];
+        setEmails(fetched);
+
+        // Mark all as read by storing current timestamp
+        if (fetched.length > 0) {
+          const latestTimestamp = Math.max(
+            ...fetched.map((e: any) => new Date(e.timestamp).getTime())
+          );
+          localStorage.setItem("ipon_inbox_last_read", String(latestTimestamp));
+        }
       }
     } catch (err) {
       console.error(err);
@@ -60,6 +70,10 @@ export default function InboxPage() {
     }
   };
 
+  if (loading) {
+    return <InboxSkeleton />;
+  }
+
   return (
     <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
       <Navbar />
@@ -69,10 +83,10 @@ export default function InboxPage() {
           <div>
             <div className="flex items-center gap-2 text-ipon-primary text-xs font-bold uppercase tracking-wider">
               <Mail className="w-3.5 h-3.5" />
-              <span>Email & Notification Preview</span>
+              <span>Notification Box</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-ipon-text mt-0.5">
-              Email Inbox
+              Notifications
             </h1>
           </div>
 
@@ -115,9 +129,9 @@ export default function InboxPage() {
             <div className="w-14 h-14 rounded-2xl bg-white/70 border border-white/80 shadow-sm flex items-center justify-center text-ipon-primary mx-auto mb-3 backdrop-blur-md">
               <Mail className="w-7 h-7 stroke-[2]" />
             </div>
-            <h3 className="font-bold text-sm text-ipon-text">No emails in inbox</h3>
+            <h3 className="font-bold text-sm text-ipon-text">No notifications yet</h3>
             <p className="text-xs text-ipon-muted mt-1 max-w-xs mx-auto">
-              Verification codes, password reset links, and daily reminder emails will appear right here!
+              Welcome greetings, verification codes, and daily reminder alerts will appear right here!
             </p>
           </div>
         )}
@@ -133,10 +147,9 @@ export default function InboxPage() {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-ipon-primary bg-pink-500/10 border border-pink-400/20 px-2.5 py-0.5 rounded-full backdrop-blur-sm">
                     {email.type}
                   </span>
-                  <h3 className="text-sm font-bold text-ipon-text mt-2">
+                  <h3 className="text-sm font-bold text-ipon-text mt-1.5">
                     {email.subject}
                   </h3>
-                  <p className="text-[11px] text-ipon-muted">To: {email.to}</p>
                 </div>
                 <span className="text-[10px] text-ipon-muted font-medium bg-white/50 px-2 py-0.5 rounded-full border border-white/60">
                   {new Date(email.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -153,7 +166,13 @@ export default function InboxPage() {
                     href={email.actionUrl}
                     className="pink-gradient-btn px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-soft"
                   >
-                    <span>Open Verification / Reset Link</span>
+                    <span>
+                      {email.type === "welcome"
+                        ? "Go to Savings Dashboard"
+                        : email.type === "reminder"
+                        ? "Log Today's Savings"
+                        : "View Details"}
+                    </span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </Link>
                 </div>

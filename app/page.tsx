@@ -1,47 +1,63 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import BottomNav from "@/components/BottomNav";
-import LoadingScreen from "@/components/LoadingScreen";
-import AddSavingsModal from "@/components/AddSavingsModal";
-import CreateChallengeModal from "@/components/CreateChallengeModal";
-import InviteCollaboratorModal from "@/components/InviteCollaboratorModal";
-import JoinChallengeModal from "@/components/JoinChallengeModal";
-import ContributorsCard from "@/components/ContributorsCard";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
+
+// Items 2 & 3: Code splitting & lazy loading modals on demand
+const AddSavingsModal = dynamic(() => import("@/components/AddSavingsModal"), { ssr: false });
+const CreateChallengeModal = dynamic(() => import("@/components/CreateChallengeModal"), { ssr: false });
+const InviteCollaboratorModal = dynamic(() => import("@/components/InviteCollaboratorModal"), { ssr: false });
+const JoinChallengeModal = dynamic(() => import("@/components/JoinChallengeModal"), { ssr: false });
+const OnboardingTutorialModal = dynamic(() => import("@/components/OnboardingTutorialModal"), { ssr: false });
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
-  Flame, 
-  Target, 
-  CheckCircle2, 
+  ChevronDown, 
+  ChevronUp, 
+  MoreHorizontal, 
+  ArrowDown, 
+  ArrowUp, 
   Plus, 
-  ArrowUpRight, 
+  ChevronLeft, 
+  Check, 
+  CreditCard, 
+  Wallet, 
   Sparkles, 
-  Calendar as CalendarIcon, 
-  TrendingUp, 
-  ChevronRight,
-  Award,
-  Wallet,
-  Clock,
-  Users,
-  UserPlus,
+  UserPlus, 
+  Calendar as CalendarIcon,
+  BarChart3,
+  TrendingUp,
   History
 } from "lucide-react";
-import { formatCurrency, getTodayDateStr, calculateExpiringDate } from "@/lib/savings-calculations";
+import { formatCurrency, getTodayDateStr } from "@/lib/savings-calculations";
+import { format, parseISO } from "date-fns";
 
 export default function HomePage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [challenges, setChallenges] = useState<any[]>([]);
   const [activeChallengeIndex, setActiveChallengeIndex] = useState(0);
+  const [recentSavings, setRecentSavings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Modal controls
+  // Dropdown switcher & menu states
+  const [isChallengeDropdownOpen, setIsChallengeDropdownOpen] = useState(false);
+  const [isCardMenuOpen, setIsCardMenuOpen] = useState(false);
+
+  // Selected Transaction for Bill Details modal (matching reference Screen 3)
+  const [selectedTx, setSelectedTx] = useState<any | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("debit");
+
+  // Modals
   const [isAddSavingsOpen, setIsAddSavingsOpen] = useState(false);
   const [isCreateChallengeOpen, setIsCreateChallengeOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isJoinOpen, setIsJoinOpen] = useState(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [modalDate, setModalDate] = useState(getTodayDateStr());
   const [modalAmount, setModalAmount] = useState<number | undefined>(undefined);
   const [modalDayRecords, setModalDayRecords] = useState<any[]>([]);
@@ -55,15 +71,56 @@ export default function HomePage() {
         router.replace("/login");
         return;
       }
+
+      let fetchedChallenges: any[] = [];
+      let fetchedSavings: any[] = [];
+      let currentUser: any = null;
+
       if (uRes.ok) {
         const uData = await uRes.json();
-        if (uData.user) setUser(uData.user);
+        if (uData.user) {
+          currentUser = uData.user;
+          setUser(uData.user);
+        }
       }
 
-      const cRes = await fetch("/api/challenges");
+      const [cRes, sRes] = await Promise.all([
+        fetch("/api/challenges"),
+        fetch("/api/savings")
+      ]);
+
       if (cRes.ok) {
         const cData = await cRes.json();
-        if (cData.challenges) setChallenges(cData.challenges);
+        if (cData.challenges) {
+          fetchedChallenges = cData.challenges;
+          setChallenges(cData.challenges);
+        }
+      }
+
+      if (sRes.ok) {
+        const sData = await sRes.json();
+        if (sData.records) {
+          fetchedSavings = sData.records;
+          setRecentSavings(sData.records);
+        }
+      }
+
+      // Check if new account for onboarding tutorial (only appears in new account only just once)
+      if (currentUser?.id && typeof window !== "undefined") {
+        const tutorialKey = `ipon_tutorial_seen_${currentUser.id}`;
+        const hasSeen = localStorage.getItem(tutorialKey);
+        const isNewAccount = localStorage.getItem(`ipon_new_account_${currentUser.id}`);
+
+        if (!hasSeen) {
+          // Trigger ONLY for brand new accounts (flagged upon registration or 0 challenges & 0 savings)
+          const isBrandNew = isNewAccount === "true" || (fetchedChallenges.length === 0 && fetchedSavings.length === 0);
+          if (isBrandNew) {
+            setIsTutorialOpen(true);
+          } else {
+            // Existing user with prior challenges/history, mark as seen so they are never interrupted
+            localStorage.setItem(tutorialKey, "true");
+          }
+        }
       }
     } catch (err) {
       console.error("Fetch data error:", err);
@@ -71,6 +128,19 @@ export default function HomePage() {
       setLoading(false);
     }
   }, [router]);
+
+  const handleCloseTutorial = () => {
+    if (user?.id && typeof window !== "undefined") {
+      localStorage.setItem(`ipon_tutorial_seen_${user.id}`, "true");
+      localStorage.removeItem(`ipon_new_account_${user.id}`);
+    }
+    setIsTutorialOpen(false);
+  };
+
+  const handleStartChallengeFromTutorial = () => {
+    handleCloseTutorial();
+    setIsCreateChallengeOpen(true);
+  };
 
   useEffect(() => {
     fetchData();
@@ -84,17 +154,29 @@ export default function HomePage() {
     return "Good evening";
   };
 
-  const activeChallenge = challenges[activeChallengeIndex] || challenges[0] || null;
-  const stats = activeChallenge?.stats;
-  const expiring = activeChallenge
-    ? calculateExpiringDate(activeChallenge.startDate, activeChallenge.targetAmount, activeChallenge.dailyGoal)
-    : null;
+  // Item 8: Memoize calculations to prevent re-renders on minor state updates
+  const activeChallenge = useMemo(() => {
+    return challenges[activeChallengeIndex] || challenges[0] || null;
+  }, [challenges, activeChallengeIndex]);
 
-  const totalSavedAcross = challenges.reduce((acc, c) => acc + (c.stats?.totalSaved || 0), 0);
-  const streak = stats?.currentStreak || 0;
-  const dailyGoal = activeChallenge?.dailyGoal || 50;
-  const savedToday = stats?.savedToday || 0;
-  const isGoalReachedToday = savedToday >= dailyGoal;
+  const stats = useMemo(() => activeChallenge?.stats, [activeChallenge]);
+
+  // Total balance: sum across all challenges
+  const totalBalance = useMemo(() => {
+    return challenges.length > 0 
+      ? challenges.reduce((acc, c) => acc + (c.stats?.totalSaved || 0), 0)
+      : 0;
+  }, [challenges]);
+
+  // Income / Saved amount
+  const incomeAmount = useMemo(() => {
+    return stats?.totalSaved ?? totalBalance;
+  }, [stats?.totalSaved, totalBalance]);
+
+  // Expenses / Target
+  const targetExpenseAmount = useMemo(() => {
+    return activeChallenge?.dailyGoal || 50;
+  }, [activeChallenge?.dailyGoal]);
 
   const handleOpenAddToday = () => {
     const today = getTodayDateStr();
@@ -106,374 +188,531 @@ export default function HomePage() {
     setIsAddSavingsOpen(true);
   };
 
+  // Format relative or standard date for transaction items
+  const formatTxDate = (dateStr: string) => {
+    try {
+      const today = getTodayDateStr();
+      if (dateStr === today) return "Today";
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = format(yesterday, "yyyy-MM-dd");
+      if (dateStr === yesterdayStr) return "Yesterday";
+      return format(parseISO(dateStr), "MMM d, yyyy");
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // Map real records for display
+  const transactionsToDisplay = recentSavings.slice(0, 5).map((r: any, idx: number) => ({
+    id: r.id,
+    title: r.note || r.challenge?.name || "Savings Deposit",
+    dateStr: formatTxDate(r.date),
+    amount: r.amountSaved,
+    isPositive: true,
+    category: "savings",
+    iconBg: idx % 2 === 0 ? "bg-emerald-50 text-emerald-600" : "bg-pink-50 text-[#FF4F81]",
+    fee: 0,
+    rawRecord: r
+  }));
+
+  const contributorsToDisplay = activeChallenge?.contributors || [];
+
   if (loading) {
-    return (
-      <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
-        <Navbar currencySymbol={currencySymbol} user={user} />
-        <LoadingScreen message="Loading dashboard..." subMessage="Fetching streaks and active challenges" />
-        <BottomNav />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (
-    <div className="min-h-screen pb-24 md:pb-12 bg-ipon-bg">
+    <div className="min-h-screen pb-24 md:pb-12 bg-[#FFF5F8] text-ipon-text selection:bg-pink-100 selection:text-ipon-primary">
+      {/* Full Website Navigation Bar */}
       <Navbar onOpenAddSavings={handleOpenAddToday} currencySymbol={currencySymbol} user={user} />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-5 sm:pt-6">
-        {/* Header Greeting */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+      {/* Main Website Container */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
+        
+        {/* Top Header / Greeting Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-1.5 text-ipon-muted text-[11px] font-semibold uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-ipon-muted text-xs font-semibold uppercase tracking-wider">
               <span>{getGreeting()}</span>
               <span>👋</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-ipon-text mt-0.5">
-              {user?.name ? `${user.name}` : "Welcome to Ipon"}
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mt-0.5">
+              {user?.name || user?.email?.split("@")[0] || "Saver"}
             </h1>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Quick Action Buttons */}
+          <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={() => setIsJoinOpen(true)}
-              className="pink-soft-btn px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-ipon-primary/10"
-              title="Join a shared challenge via invite code"
+              className="pink-soft-btn px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-ipon-primary/15"
             >
               <UserPlus className="w-3.5 h-3.5" />
               <span>Join Challenge</span>
             </button>
 
             <button
-              onClick={handleOpenAddToday}
-              className="pink-gradient-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-soft"
+              onClick={() => setIsCreateChallengeOpen(true)}
+              className="pink-soft-btn px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-ipon-primary/15"
             >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>New Challenge</span>
+            </button>
+
+            <button
+              onClick={handleOpenAddToday}
+              className="pink-gradient-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-soft"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>Add Savings</span>
             </button>
           </div>
         </div>
 
-        {/* If no challenge exists yet, show friendly starter banner */}
-        {!loading && challenges.length === 0 && (
-          <div className="glass-card rounded-2xl p-6 sm:p-8 text-center shadow-glass mb-6 relative overflow-hidden">
-            <div className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur-md text-ipon-primary mx-auto flex items-center justify-center mb-3 border border-white shadow-glass-sm">
-              <Sparkles className="w-6 h-6 stroke-[2]" />
-            </div>
-            <h2 className="text-lg font-bold text-ipon-text mb-1.5">
-              Start Your First Ipon Challenge
-            </h2>
-            <p className="text-xs text-ipon-muted max-w-md mx-auto mb-5">
-              Pick a small daily target like {currencySymbol}50. Build momentum, track streaks, and watch your money grow.
-            </p>
-            <button
-              onClick={() => setIsCreateChallengeOpen(true)}
-              className="pink-gradient-btn px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-soft inline-flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-              <span>Create Ipon Challenge</span>
-            </button>
-          </div>
-        )}
+        {/* 2-Column Responsive Web Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 lg:gap-6 items-start">
+          
+          {/* ============================================================ */}
+          {/* LEFT COLUMN: Hero Balance Card + Transactions History        */}
+          {/* ============================================================ */}
+          <div className="md:col-span-7 space-y-5 lg:space-y-6">
+            
+            {/* HERO CARD: Styled exactly like reference card with rich pink */}
+            <div className="bg-gradient-to-br from-[#D83266] to-[#C2185B] rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-pink-900/15 border border-white/15 relative overflow-hidden">
+              {/* Subtle decorative curved rings from reference design */}
+              <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full border-[22px] border-white/10 pointer-events-none" />
+              <div className="absolute top-16 -left-20 w-80 h-80 rounded-full border-[28px] border-white/5 pointer-events-none" />
 
-        {/* Challenge Switcher if multiple challenges exist */}
-        {challenges.length > 1 && (
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2.5 mb-3.5 scrollbar-none">
-            {challenges.map((c, idx) => (
-              <button
-                key={c.id}
-                onClick={() => setActiveChallengeIndex(idx)}
-                className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                  idx === activeChallengeIndex
-                    ? "bg-ipon-primary text-white shadow-soft"
-                    : "glass-pill text-ipon-muted hover:text-ipon-text hover:bg-white/90"
-                }`}
-              >
-                {c.name}
-              </button>
-            ))}
-          </div>
-        )}
+              {/* Card Header: Total Balance with Caret & Options */}
+              <div className="flex items-center justify-between relative z-10">
+                <button
+                  type="button"
+                  onClick={() => setIsChallengeDropdownOpen(!isChallengeDropdownOpen)}
+                  className="flex items-center gap-1.5 text-white/90 text-xs sm:text-sm font-semibold hover:text-white transition-colors"
+                >
+                  <span>Total Balance</span>
+                  {isChallengeDropdownOpen ? (
+                    <ChevronUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                  )}
+                </button>
+              </div>
 
-        {/* Highlight Cards Grid */}
-        {activeChallenge && (
-          <div className="space-y-4">
-            {/* Primary Hero Card */}
-            <div className="glass-hero rounded-2xl p-5 sm:p-7 relative overflow-hidden transition-all">
-              {/* Soft pink decorative glow */}
-              <div className="absolute -right-12 -top-12 w-56 h-56 bg-gradient-to-br from-[#FF4F81]/20 to-pink-200/20 rounded-full blur-3xl pointer-events-none" />
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
-                <div>
-                  <span className="text-[11px] text-ipon-muted font-bold uppercase tracking-wider block mb-1">
-                    Total Saved
-                  </span>
-                  <div className="text-2xl sm:text-4xl font-extrabold text-ipon-text tracking-tight truncate">
-                    {formatCurrency(stats?.totalSaved || 0, currencySymbol)}
-                  </div>
-
-                  {/* Expected vs Actual status badge */}
-                  <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] font-semibold text-ipon-primary bg-white/70 backdrop-blur-md border border-white/80 shadow-glass-sm px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                      <span>Target by Today:</span>
-                      <strong>{formatCurrency(stats?.expectedSavings || 0, currencySymbol)}</strong>
-                      <span className="text-ipon-muted font-normal text-[10px]">({stats?.elapsedDays || 0}d)</span>
-                    </span>
-                    <span className="text-xs text-gray-300 hidden sm:inline">•</span>
-                    {stats?.aheadBehind >= 0 ? (
-                      <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1 bg-emerald-50/80 backdrop-blur-md border border-emerald-100 px-2 py-0.5 rounded-full">
-                        🔥 +{formatCurrency(stats?.aheadBehind, currencySymbol)} ahead
-                      </span>
-                    ) : (
-                      <span className="text-[11px] font-bold text-amber-600 flex items-center gap-1 bg-amber-50/80 backdrop-blur-md border border-amber-100 px-2 py-0.5 rounded-full">
-                        {formatCurrency(Math.abs(stats?.aheadBehind), currencySymbol)} behind schedule
-                      </span>
-                    )}
-                  </div>
+              {/* Switch Challenge Dropdown */}
+              {isChallengeDropdownOpen && challenges.length > 0 && (
+                <div className="absolute top-16 left-6 z-30 bg-white text-ipon-text rounded-2xl p-2 shadow-2xl border border-pink-100 min-w-[220px] animate-in fade-in slide-in-from-top-2 duration-150">
+                  <p className="text-[10px] uppercase font-bold text-gray-400 px-3 py-1">
+                    Select Challenge
+                  </p>
+                  {challenges.map((c, idx) => (
+                    <button
+                      key={c.id}
+                      onClick={() => {
+                        setActiveChallengeIndex(idx);
+                        setIsChallengeDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
+                        idx === activeChallengeIndex
+                          ? "bg-pink-50 text-ipon-primary"
+                          : "hover:bg-gray-50 text-gray-700"
+                      }`}
+                    >
+                      <span className="truncate">{c.name}</span>
+                      {idx === activeChallengeIndex && <Check className="w-3.5 h-3.5 shrink-0" />}
+                    </button>
+                  ))}
                 </div>
+              )}
 
-                {/* Streak Counter Box */}
-                <div className="flex items-center gap-2.5 bg-white/70 backdrop-blur-md border border-white/90 shadow-glass-sm rounded-2xl px-4 py-3 self-start sm:self-auto">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white to-pink-50 flex items-center justify-center shadow-glass-sm border border-white">
-                    <span className="text-xl">🔥</span>
+              {/* Big Main Balance */}
+              <div className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight my-5 relative z-10">
+                {formatCurrency(totalBalance, currencySymbol)}
+              </div>
+
+              {/* Bottom Row inside card: Income vs Expenses */}
+              <div className="flex items-center justify-between pt-3 border-t border-white/10 relative z-10">
+                {/* Income / Total Saved */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-white shrink-0">
+                    <ArrowDown className="w-4 h-4 stroke-[2.5]" />
                   </div>
                   <div>
-                    <div className="text-xl font-black text-ipon-primary">
-                      {streak} {streak === 1 ? "Day" : "Days"}
-                    </div>
-                    <p className="text-[10px] font-bold text-ipon-muted uppercase tracking-wider">
-                      Saving Streak
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sub-grid: Expected to Date, Today's Goal, Saved Today, Goal Progress */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-6 pt-5 border-t border-white/70">
-                {/* 1. Total Needed by Today (Expected Savings) */}
-                <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all">
-                  <span className="text-[10px] sm:text-[11px] text-ipon-muted font-semibold block mb-0.5 truncate">
-                    Expected to Date
-                  </span>
-                  <div className="text-base sm:text-lg font-extrabold text-ipon-text truncate">
-                    {formatCurrency(stats?.expectedSavings || 0, currencySymbol)}
-                  </div>
-                  <span className="text-[10px] text-ipon-muted mt-0.5 block truncate">
-                    {stats?.elapsedDays || 0} days × {formatCurrency(dailyGoal, currencySymbol)}
-                  </span>
-                </div>
-
-                {/* 2. Today's Goal */}
-                <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all">
-                  <span className="text-[10px] sm:text-[11px] text-ipon-muted font-medium block mb-0.5 truncate">
-                    Today&apos;s Goal
-                  </span>
-                  <div className="text-base sm:text-lg font-bold text-ipon-text truncate">
-                    {formatCurrency(dailyGoal, currencySymbol)}
-                  </div>
-                  <span className="text-[10px] text-ipon-muted mt-0.5 block truncate">
-                    Target per day
-                  </span>
-                </div>
-
-                {/* 3. Saved Today */}
-                <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all flex items-center justify-between">
-                  <div className="min-w-0 pr-1">
-                    <span className="text-[10px] sm:text-[11px] text-ipon-muted font-bold block mb-0.5 truncate">
-                      Saved Today
+                    <span className="text-white/75 text-xs font-medium block leading-tight">
+                      Income
                     </span>
-                    <div className="text-base sm:text-lg font-bold text-ipon-text flex items-center gap-1.5 truncate">
-                      <span className="truncate">{formatCurrency(savedToday, currencySymbol)}</span>
-                      {isGoalReachedToday && (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 fill-emerald-50 shrink-0" />
-                      )}
-                    </div>
-                    <span className="text-[10px] text-ipon-muted mt-0.5 block truncate">
-                      {isGoalReachedToday ? "Target met ✅" : savedToday > 0 ? "Partially saved" : "Not yet logged"}
+                    <span className="text-white text-base sm:text-lg font-bold block leading-tight mt-0.5">
+                      {formatCurrency(incomeAmount, currencySymbol)}
                     </span>
                   </div>
-                  <button
-                    onClick={handleOpenAddToday}
-                    className="pink-soft-btn px-2 py-1 rounded-lg text-xs font-bold shrink-0"
-                  >
-                    {savedToday > 0 ? "Edit" : "Log"}
-                  </button>
                 </div>
 
-                {/* 4. Goal Progress */}
-                <div className="p-3.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-glass-sm hover:bg-white/80 transition-all">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[10px] sm:text-[11px] text-ipon-muted font-bold truncate">
-                      Progress
+                {/* Expenses / Target Goal */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-white shrink-0">
+                    <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <span className="text-white/75 text-xs font-medium block leading-tight">
+                      Expenses
                     </span>
-                    <span className="text-[10px] sm:text-[11px] font-bold text-ipon-primary">
-                      {stats?.goalProgressPercent || 0}%
-                    </span>
-                  </div>
-                  <div className="text-xs font-bold text-ipon-text truncate">
-                    {formatCurrency(stats?.totalSaved || 0, currencySymbol)} / {formatCurrency(activeChallenge.targetAmount, currencySymbol)}
-                  </div>
-                  {/* Progress bar */}
-                  <div className="w-full h-2 bg-white/80 rounded-full mt-1.5 overflow-hidden p-0.5 border border-white">
-                    <div
-                      className="h-full bg-gradient-to-r from-ipon-primary to-pink-400 rounded-full transition-all duration-500 shadow-sm"
-                      style={{ width: `${Math.min(100, stats?.goalProgressPercent || 0)}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Expiring / Completion Date Bar */}
-              <div className="mt-4 pt-3.5 border-t border-white/70 flex flex-wrap items-center justify-between text-[11px] text-ipon-muted gap-2">
-                <div className="flex items-center gap-1.5 font-medium">
-                  <CalendarIcon className="w-3.5 h-3.5 text-ipon-primary" />
-                  <span>Started: <strong className="text-ipon-text">{activeChallenge.startDate}</strong></span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <div className="flex items-center gap-1.5 bg-white/70 backdrop-blur-md px-2.5 py-0.5 rounded-lg border border-white/80 shadow-glass-sm">
-                    <Clock className="w-3 h-3 text-ipon-primary" />
-                    <span>
-                      Expiring Date: <strong className="text-ipon-primary">{activeChallenge.endDate || expiring?.formattedDate}</strong>
-                      {expiring && (
-                        <span className="text-ipon-muted ml-1 font-medium">
-                          ({expiring.daysNeeded.toLocaleString()} days)
-                        </span>
-                      )}
+                    <span className="text-white text-base sm:text-lg font-bold block leading-tight mt-0.5">
+                      {formatCurrency(targetExpenseAmount, currencySymbol)}
                     </span>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsInviteOpen(true)}
-                    className="pink-soft-btn px-2 py-0.5 rounded-lg text-[11px] font-bold inline-flex items-center gap-1"
-                    title="Invite partners or friends to save together"
-                  >
-                    <Users className="w-3 h-3" />
-                    <span>{activeChallenge.isShared ? "Contributors" : "Invite"}</span>
-                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Contributors Card (Who Contributed) */}
-            <ContributorsCard
-              contributors={activeChallenge.contributors || []}
-              totalSaved={stats?.totalSaved || 0}
-              currencySymbol={currencySymbol}
-              onOpenInvite={() => setIsInviteOpen(true)}
-              isShared={activeChallenge.isShared}
-            />
+            {/* TRANSACTIONS HISTORY CARD */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-pink-100/60">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base sm:text-lg font-bold text-gray-900">
+                  Transactions History
+                </h2>
+                <Link 
+                  href="/history" 
+                  className="text-xs font-semibold text-gray-400 hover:text-ipon-primary transition-colors"
+                >
+                  See all
+                </Link>
+              </div>
 
-            {/* Quick Actions & Navigation Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Calendar Quick Entry Card */}
-              <Link
-                href="/calendar"
-                className="glass-card glass-card-hover rounded-2xl p-4 flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm group-hover:scale-105 transition-transform">
+              {/* List of Transactions or Clean Empty State */}
+              {transactionsToDisplay.length > 0 ? (
+                <div className="space-y-3">
+                  {transactionsToDisplay.map((tx) => (
+                    <div
+                      key={tx.id}
+                      onClick={() => setSelectedTx(tx)}
+                      className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-gray-50 active:scale-[0.99] transition-all cursor-pointer border border-transparent hover:border-gray-100"
+                    >
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-900 leading-tight">
+                          {tx.title}
+                        </h3>
+                        <p className="text-xs text-gray-400 leading-tight mt-0.5">
+                          {tx.dateStr}
+                        </p>
+                      </div>
+
+                      {/* Amount display */}
+                      <div className="text-right">
+                        <span className="text-sm sm:text-base font-bold text-emerald-500">
+                          + {formatCurrency(tx.amount, currencySymbol)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-gray-400">
+                  <p className="text-sm font-medium text-gray-500">No transactions yet</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Click{" "}
+                    <button
+                      onClick={handleOpenAddToday}
+                      className="text-ipon-primary font-bold hover:underline"
+                    >
+                      Add Savings
+                    </button>{" "}
+                    to record your first deposit!
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ============================================================ */}
+          {/* RIGHT COLUMN: Send Again + Quick Links & Overview            */}
+          {/* ============================================================ */}
+          <div className="md:col-span-5 space-y-5 lg:space-y-6">
+            
+            {/* SEND AGAIN / CONTRIBUTORS CARD */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-pink-100/60">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base sm:text-lg font-bold text-gray-900">
+                  Send Again
+                </h2>
+                <button
+                  onClick={() => setIsInviteOpen(true)}
+                  className="text-xs font-semibold text-gray-400 hover:text-ipon-primary transition-colors"
+                >
+                  See all
+                </button>
+              </div>
+
+              {/* Horizontal Avatars Row with Pink Plus Button */}
+              <div className="flex items-center gap-3.5 overflow-x-auto pb-2 scrollbar-none">
+                {/* Floating Plus Button */}
+                <button
+                  onClick={() => setIsInviteOpen(true)}
+                  className="w-12 h-12 rounded-full bg-[#E63E6F] text-white flex items-center justify-center shadow-lg shadow-pink-500/30 hover:scale-105 active:scale-95 transition-transform shrink-0"
+                  title="Invite Partner"
+                >
+                  <Plus className="w-6 h-6 stroke-[2.5]" />
+                </button>
+
+                {/* Contributor Avatars or Empty Helper */}
+                {contributorsToDisplay.length > 0 ? (
+                  contributorsToDisplay.map((item: any, i: number) => {
+                    const name = item.name || "Friend";
+                    const firstName = name.split(" ")[0];
+                    const initial = firstName[0]?.toUpperCase() || "U";
+                    const bgClass = item.bg || "bg-pink-100 text-ipon-primary";
+
+                    return (
+                      <div
+                        key={item.userId || i}
+                        onClick={() => setIsInviteOpen(true)}
+                        className="flex flex-col items-center gap-1.5 cursor-pointer shrink-0 group"
+                      >
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ring-2 ring-transparent group-hover:ring-ipon-primary transition-all ${bgClass}`}>
+                          {initial}
+                        </div>
+                        <span className="text-[11px] font-semibold text-gray-600 truncate max-w-[55px]">
+                          {firstName}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-xs text-gray-400 py-2">
+                    <span>Invite partners or friends to save together</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* QUICK ACTIONS & SUMMARY CARD */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-pink-100/60 space-y-4">
+              <h2 className="text-base sm:text-lg font-bold text-gray-900">
+                Quick Access
+              </h2>
+
+              <div className="grid grid-cols-2 gap-3">
+                {/* Monthly Calendar Quick Entry */}
+                <Link
+                  href="/calendar"
+                  className="p-4 rounded-2xl bg-pink-50/50 hover:bg-pink-50 border border-pink-100/60 transition-all flex flex-col items-start gap-2 group"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-ipon-primary shadow-sm group-hover:scale-105 transition-transform">
                     <CalendarIcon className="w-5 h-5 stroke-[2]" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-xs sm:text-sm text-ipon-text group-hover:text-ipon-primary transition-colors">
-                      Monthly Calendar
+                    <h3 className="font-bold text-xs text-gray-900 group-hover:text-ipon-primary transition-colors">
+                      Calendar
                     </h3>
-                    <p className="text-[11px] text-ipon-muted">
-                      View all days, streak status & click to log
+                    <p className="text-[10px] text-gray-400">
+                      Streak tracking
                     </p>
                   </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-ipon-muted group-hover:text-ipon-primary group-hover:translate-x-0.5 transition-all" />
-              </Link>
+                </Link>
 
-              {/* History Quick Card */}
-              <Link
-                href="/history"
-                className="glass-card glass-card-hover rounded-2xl p-4 flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur-md flex items-center justify-center text-ipon-primary border border-white shadow-glass-sm group-hover:scale-105 transition-transform">
-                    <History className="w-5 h-5 stroke-[2]" />
+                {/* Analytics / Stats Quick Entry */}
+                <Link
+                  href="/stats"
+                  className="p-4 rounded-2xl bg-pink-50/50 hover:bg-pink-50 border border-pink-100/60 transition-all flex flex-col items-start gap-2 group"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-ipon-primary shadow-sm group-hover:scale-105 transition-transform">
+                    <BarChart3 className="w-5 h-5 stroke-[2]" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-xs sm:text-sm text-ipon-text group-hover:text-ipon-primary transition-colors">
-                      Savings History
+                    <h3 className="font-bold text-xs text-gray-900 group-hover:text-ipon-primary transition-colors">
+                      Analytics
                     </h3>
-                    <p className="text-[11px] text-ipon-muted">
-                      Review previous logs & past activity
+                    <p className="text-[10px] text-gray-400">
+                      Savings charts
                     </p>
                   </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-ipon-muted group-hover:text-ipon-primary group-hover:translate-x-0.5 transition-all" />
-              </Link>
+                </Link>
+              </div>
             </div>
 
-            {/* Create Another Challenge Button */}
-            <div className="flex justify-center pt-2">
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/* SCREEN 3 MODAL: Bill Details / Transaction Details           */}
+        {/* ============================================================ */}
+        {selectedTx && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-150">
+            <div 
+              className="w-full max-w-sm bg-white rounded-[32px] p-6 shadow-2xl relative animate-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Top Navigation Row: Back Arrow, Title, More options */}
+              <div className="flex items-center justify-between mb-5">
+                <button
+                  onClick={() => setSelectedTx(null)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
+                </button>
+                <h3 className="text-base font-bold text-gray-900">
+                  Bill Details
+                </h3>
+                <button
+                  onClick={() => setSelectedTx(null)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700"
+                >
+                  <MoreHorizontal className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Elevated Receipt Card */}
+              <div className="bg-gray-50/80 rounded-2xl p-4 border border-gray-100">
+                {/* Title & Date */}
+                <div className="mb-4">
+                  <h4 className="font-bold text-base text-gray-900">
+                    {selectedTx.title}
+                  </h4>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {selectedTx.dateStr}
+                  </p>
+                </div>
+
+                <div className="border-t border-gray-200/60 my-3" />
+
+                {/* Price, Fee, Total Rows */}
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between text-gray-500">
+                    <span>Price</span>
+                    <span className="font-bold text-gray-900">
+                      {formatCurrency(selectedTx.amount, currencySymbol)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-gray-500">
+                    <span>Fee</span>
+                    <span className="font-bold text-gray-900">
+                      {formatCurrency(selectedTx.fee || 0, currencySymbol)}
+                    </span>
+                  </div>
+                  <div className="border-t border-gray-200/60 pt-2 flex justify-between font-bold text-sm text-gray-900">
+                    <span>Total</span>
+                    <span>
+                      {formatCurrency(selectedTx.amount + (selectedTx.fee || 0), currencySymbol)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Method Section */}
+              <div className="mt-5">
+                <h4 className="text-xs font-bold text-gray-900 mb-3">
+                  Select payment method
+                </h4>
+
+                <div className="space-y-2">
+                  {/* Debit Card */}
+                  <div
+                    onClick={() => setSelectedPaymentMethod("debit")}
+                    className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${
+                      selectedPaymentMethod === "debit"
+                        ? "border-[#FF4F81] bg-pink-50/50"
+                        : "border-gray-100 bg-gray-50/50 hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <CreditCard className={`w-5 h-5 ${selectedPaymentMethod === "debit" ? "text-ipon-primary" : "text-gray-400"}`} />
+                      <span className="text-xs font-bold text-gray-800">Debit Card</span>
+                    </div>
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                      selectedPaymentMethod === "debit"
+                        ? "border-ipon-primary"
+                        : "border-gray-300"
+                    }`}>
+                      {selectedPaymentMethod === "debit" && (
+                        <div className="w-2 h-2 rounded-full bg-ipon-primary" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Paypal */}
+                  <div
+                    onClick={() => setSelectedPaymentMethod("paypal")}
+                    className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${
+                      selectedPaymentMethod === "paypal"
+                        ? "border-[#FF4F81] bg-pink-50/50"
+                        : "border-gray-100 bg-gray-50/50 hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Wallet className={`w-5 h-5 ${selectedPaymentMethod === "paypal" ? "text-ipon-primary" : "text-gray-400"}`} />
+                      <span className="text-xs font-bold text-gray-800">Paypal</span>
+                    </div>
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                      selectedPaymentMethod === "paypal"
+                        ? "border-ipon-primary"
+                        : "border-gray-300"
+                    }`}>
+                      {selectedPaymentMethod === "paypal" && (
+                        <div className="w-2 h-2 rounded-full bg-ipon-primary" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pay Now Button */}
               <button
-                onClick={() => setIsCreateChallengeOpen(true)}
-                className="text-xs font-semibold text-ipon-muted hover:text-ipon-primary transition-colors inline-flex items-center gap-1.5 py-1 px-3 rounded-full hover:bg-white"
+                onClick={() => setSelectedTx(null)}
+                className="w-full mt-6 py-3.5 rounded-full bg-[#E63E6F] hover:bg-[#D6336C] text-white font-bold text-sm shadow-lg shadow-pink-500/25 active:scale-[0.98] transition-all"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Create another Ipon Challenge</span>
+                Pay Now
               </button>
             </div>
           </div>
         )}
 
-        {/* Minimal Footer with Privacy & Terms */}
-        <footer className="mt-10 pt-6 border-t border-ipon-border/60 text-center text-xs text-ipon-muted flex flex-wrap items-center justify-center gap-3">
-          <span>Ipon © {new Date().getFullYear()}</span>
-          <span>•</span>
-          <Link href="/privacy" className="hover:text-ipon-primary transition-colors">
-            Privacy Policy
-          </Link>
-          <span>•</span>
-          <Link href="/terms" className="hover:text-ipon-primary transition-colors">
-            Terms of Service
-          </Link>
-        </footer>
+        {/* Existing Functional Modals */}
+        <AddSavingsModal
+          isOpen={isAddSavingsOpen}
+          onClose={() => setIsAddSavingsOpen(false)}
+          onSuccess={fetchData}
+          challenges={challenges}
+          defaultChallengeId={activeChallenge?.id}
+          defaultDate={modalDate}
+          defaultAmount={modalAmount}
+          defaultNote=""
+          currencySymbol={currencySymbol}
+          dayRecords={modalDayRecords}
+        />
+
+        <CreateChallengeModal
+          isOpen={isCreateChallengeOpen}
+          onClose={() => setIsCreateChallengeOpen(false)}
+          onSuccess={fetchData}
+          currencySymbol={currencySymbol}
+        />
+
+        <InviteCollaboratorModal
+          isOpen={isInviteOpen}
+          onClose={() => setIsInviteOpen(false)}
+          challengeName={activeChallenge?.name || "Ipon Challenge"}
+          inviteCode={activeChallenge?.inviteCode}
+          contributors={activeChallenge?.contributors || []}
+          currencySymbol={currencySymbol}
+        />
+
+        <JoinChallengeModal
+          isOpen={isJoinOpen}
+          onClose={() => setIsJoinOpen(false)}
+          onSuccess={() => fetchData()}
+        />
+
+        <OnboardingTutorialModal
+          isOpen={isTutorialOpen}
+          onClose={handleCloseTutorial}
+          onStartChallenge={handleStartChallengeFromTutorial}
+          userName={user?.name}
+          currencySymbol={currencySymbol}
+        />
+
       </main>
 
-      {/* Modals */}
-      <AddSavingsModal
-        isOpen={isAddSavingsOpen}
-        onClose={() => setIsAddSavingsOpen(false)}
-        onSuccess={fetchData}
-        challenges={challenges}
-        defaultChallengeId={activeChallenge?.id}
-        defaultDate={modalDate}
-        defaultAmount={modalAmount}
-        defaultNote=""
-        currencySymbol={currencySymbol}
-        dayRecords={modalDayRecords}
-      />
-
-      <CreateChallengeModal
-        isOpen={isCreateChallengeOpen}
-        onClose={() => setIsCreateChallengeOpen(false)}
-        onSuccess={fetchData}
-        currencySymbol={currencySymbol}
-      />
-
-      {/* Invite Collaborators Modal */}
-      <InviteCollaboratorModal
-        isOpen={isInviteOpen}
-        onClose={() => setIsInviteOpen(false)}
-        challengeName={activeChallenge?.name || "Ipon Challenge"}
-        inviteCode={activeChallenge?.inviteCode}
-        contributors={activeChallenge?.contributors || []}
-        currencySymbol={currencySymbol}
-      />
-
-      {/* Join Challenge Modal */}
-      <JoinChallengeModal
-        isOpen={isJoinOpen}
-        onClose={() => setIsJoinOpen(false)}
-        onSuccess={() => fetchData()}
-      />
-
+      {/* BottomNav shown only on mobile */}
       <BottomNav onOpenAddSavings={handleOpenAddToday} />
     </div>
   );

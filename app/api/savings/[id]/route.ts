@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { serverCache } from "@/lib/cache";
 
 export async function PATCH(
   req: Request,
@@ -53,6 +54,7 @@ export async function PATCH(
       });
     }
 
+    serverCache.invalidateUser(user.id);
     return NextResponse.json({ record: updated });
   } catch (error) {
     console.error("Update savings record error:", error);
@@ -94,6 +96,7 @@ export async function DELETE(
       where: { id: params.id },
     });
 
+    serverCache.invalidateUser(user.id);
     return NextResponse.json({ message: "Record deleted successfully" });
   } catch (error) {
     console.error("Delete record error:", error);

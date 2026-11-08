@@ -211,6 +211,8 @@ export interface SafeUser {
   isVerified: boolean;
   currency: string;
   currencySymbol: string;
+  avatarUrl?: string | null;
+  avatarUpdatedAt?: string | Date | null;
   createdAt: string | Date;
 }
 
@@ -226,6 +228,8 @@ export function toSafeUser(user: any): SafeUser | null {
     isVerified: Boolean(user.isVerified),
     currency: user.currency || "PHP",
     currencySymbol: user.currencySymbol || "₱",
+    avatarUrl: user.avatarUrl || null,
+    avatarUpdatedAt: user.avatarUpdatedAt || null,
     createdAt: user.createdAt,
   };
 }

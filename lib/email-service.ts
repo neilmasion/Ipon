@@ -6,7 +6,7 @@ export interface SentEmail {
   id: string;
   to: string;
   subject: string;
-  type: "verification" | "reset" | "reminder" | "milestone";
+  type: "verification" | "reset" | "reminder" | "milestone" | "welcome";
   content: string;
   actionUrl?: string;
   timestamp: string;
@@ -27,6 +27,19 @@ export function getRecentEmails(emailFilter?: string): SentEmail[] {
     return emails.filter((e) => e.to.toLowerCase() === emailFilter.toLowerCase());
   }
   return emails;
+}
+
+/**
+ * Filter for in-app user notifications.
+ * Excludes private auth security emails (verification codes, OTPs, and password reset links).
+ */
+export function getRecentNotifications(emailFilter?: string): SentEmail[] {
+  const emails = globalEmailStore._iponEmails || [];
+  const notificationTypes = ["welcome", "reminder", "milestone"];
+  return emails.filter((e) => {
+    const matchesEmail = !emailFilter || e.to.toLowerCase() === emailFilter.toLowerCase();
+    return matchesEmail && notificationTypes.includes(e.type);
+  });
 }
 
 // Spend cap safeguard: Maximum 10 outgoing emails per recipient per 24 hours
@@ -281,6 +294,37 @@ export async function sendDailyReminderEmail(email: string, dailyGoal: number, c
     to: email,
     subject: "Time to save! 💗",
     type: "reminder",
+    content: text,
+    timestamp: new Date().toISOString(),
+  };
+
+  return sendEmail(email, record.subject, text, html, record);
+}
+
+export async function sendWelcomeGreetingEmail(email: string, name: string) {
+  if (!canSendToRecipient(email)) {
+    return { success: false, reason: "Daily email limit reached" };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const subject = `Welcome to Ipon, ${name}! 🌸 Happy Saving!`;
+  const text = `Hi ${name},\n\nWelcome to Ipon! 🎉 We're thrilled to have you here.\n\nIpon helps you build a daily savings habit and reach your financial goals. Set your daily target, track your streaks, and watch your savings grow every day.\n\nHappy saving! 💗`;
+  
+  const html = wrapHtml(
+    `Welcome to Ipon, ${name}! 🎉`,
+    `<p style="color:#444;font-size:15px;line-height:1.6;">Hi <strong>${name}</strong>,</p>
+     <p style="color:#555;font-size:14px;line-height:1.6;">Welcome to Ipon! We're thrilled to have you join our daily savings journey. 🌸</p>
+     <p style="color:#555;font-size:14px;line-height:1.6;">Every small peso counts towards your dreams. Track your progress, build your streaks, and save with ease!</p>
+     ${buttonHtml(appUrl, "Go to Dashboard")}
+     <p style="color:#888;font-size:12px;text-align:center;margin-top:20px;">Happy saving! 💗</p>`
+  );
+
+  const record: SentEmail = {
+    id: Math.random().toString(36).substring(2, 9),
+    to: email,
+    subject,
+    type: "welcome",
+    actionUrl: "/",
     content: text,
     timestamp: new Date().toISOString(),
   };

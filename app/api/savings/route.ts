@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { sanitizeText, sanitizeDate, sanitizeAmount, safeErrorResponse } from "@/lib/security";
+import { serverCache, getApiCacheHeaders } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +18,12 @@ export async function GET(req: Request) {
     const goalId = searchParams.get("goalId");
     const month = searchParams.get("month"); // Format: YYYY-MM
     const year = searchParams.get("year");   // Format: YYYY
+    const pageParam = searchParams.get("page");
+    const limitParam = searchParams.get("limit");
 
     let where: any = {};
 
     if (challengeId) {
-      // In a shared challenge, fetch all members' savings records
       where.challengeId = challengeId;
       if (month) where.date = { startsWith: month };
       else if (year) where.date = { startsWith: year };
@@ -32,23 +34,56 @@ export async function GET(req: Request) {
       else if (year) where.date = { startsWith: year };
     }
 
-    const records = await prisma.savingsRecord.findMany({
-      where,
-      include: {
-        user: {
-          select: { id: true, name: true, email: true },
-        },
-        challenge: {
-          select: { id: true, name: true, dailyGoal: true, isShared: true },
-        },
-        goal: {
-          select: { id: true, name: true },
-        },
-      },
-      orderBy: { date: "desc" },
-    });
+    // Item 10: Pagination for large lists
+    const page = pageParam ? Math.max(1, parseInt(pageParam, 10)) : undefined;
+    const limit = limitParam ? Math.min(100, Math.max(1, parseInt(limitParam, 10))) : (page ? 30 : undefined);
+    const skip = page && limit ? (page - 1) * limit : undefined;
 
-    return NextResponse.json({ records });
+    const cacheKey = `user:${user.id}:savings:${challengeId || ""}:${goalId || ""}:${month || ""}:${year || ""}:${page || "all"}:${limit || "all"}`;
+
+    const data = await serverCache.getOrSet(
+      cacheKey,
+      async () => {
+        const [records, total] = await Promise.all([
+          prisma.savingsRecord.findMany({
+            where,
+            include: {
+              user: {
+                select: { id: true, name: true, email: true },
+              },
+              challenge: {
+                select: { id: true, name: true, dailyGoal: true, isShared: true },
+              },
+              goal: {
+                select: { id: true, name: true },
+              },
+            },
+            orderBy: { date: "desc" },
+            skip,
+            take: limit,
+          }),
+          limit ? prisma.savingsRecord.count({ where }) : Promise.resolve(0),
+        ]);
+
+        return {
+          records,
+          pagination: limit
+            ? {
+                page: page || 1,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+                hasMore: (page || 1) * limit < total,
+              }
+            : undefined,
+        };
+      },
+      15_000 // 15s TTL
+    );
+
+    return NextResponse.json(data, {
+      headers: getApiCacheHeaders(10, 60),
+    });
   } catch (error) {
     console.error("Fetch savings records error:", error);
     return NextResponse.json({ error: "Failed to fetch savings records" }, { status: 500 });
@@ -171,6 +206,9 @@ export async function POST(req: Request) {
         },
       });
     }
+
+    // Invalidate cached stats and savings lists for this user
+    serverCache.invalidateUser(user.id);
 
     return NextResponse.json({ record }, { status: 200 });
   } catch (error) {
